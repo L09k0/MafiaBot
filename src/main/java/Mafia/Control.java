@@ -41,7 +41,7 @@ public class Control
 	private String getBotToken() throws IOException
 	{
 		String currentDirectory = System.getProperty("user.dir");
-		System.out.println(currentDirectory+"\\token.txt");
+		//System.out.println(currentDirectory+"\\token.txt");
 		BufferedReader buff = new BufferedReader(new FileReader(currentDirectory+"\\token.txt"));
 		String token = buff.readLine();
 		buff.close();
@@ -52,6 +52,8 @@ public class Control
 	{
 		 System.out.println("Initializing bot\n");
 
+		 Database db = new Database();
+		 
 		 bot = new TelegramBot(getBotToken().toString());
 		 System.out.println("Initializing bot successfully !\n");
 		 
@@ -109,6 +111,12 @@ public class Control
 							case "/leave":
 								Leave();
 							break;
+							case "/profil":
+								Profil();
+							break;
+							case "/editprofil":
+								EditProfil();
+							break;
 							
 							// Leading use 
 							case "/step":
@@ -156,7 +164,9 @@ public class Control
 				+ "/vote - Голосование\n"
 				+ "/kill - Убить игрока\n"
 				+ "/cure - Лечить игрока\n"
-				+ "/check - Проверить игрока\n";
+				+ "/check - Проверить игрока\n"
+				+ "/profil - Посмотреть ваш профиль\n"
+				+ "/editprofil - Редактировать ваш профиль\n";
 		
 		bot.execute(new SendMessage(update.message().from().id(), str));
 	}
@@ -184,6 +194,16 @@ public class Control
 	private void Leave()
 	{
 		bot.execute(new SendMessage(update.message().from().id(), "Leave !"));
+	}
+	
+	private void Profil()
+	{
+		bot.execute(new SendMessage(update.message().from().id(), "Profil !"));
+	}
+	
+	private void EditProfil()
+	{
+		bot.execute(new SendMessage(update.message().from().id(), "editprofil !"));
 	}
 	
 	private void Step()
