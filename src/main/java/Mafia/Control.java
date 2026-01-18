@@ -29,6 +29,7 @@ public class Control
 	private boolean day;
 	private long id_lobby = 0;
 	private boolean is_game; 
+	private Database db;
 	
 	// MOVE step
 	private enum StepPlay
@@ -51,8 +52,10 @@ public class Control
 	public void Run() throws IOException
 	{
 		 System.out.println("Initializing bot\n");
-
-		 Database db = new Database();
+		 
+		 db = new Database("Mafia");
+		 db.Connect();
+		 db.CreateTable();
 		 
 		 bot = new TelegramBot(getBotToken().toString());
 		 System.out.println("Initializing bot successfully !\n");
@@ -77,6 +80,11 @@ public class Control
 						
 						switch (command) 
 						{
+							// Start
+							case "/start":
+								Start();
+							break;
+
 							// help 
 							case "/help":
 								Helper();
@@ -128,8 +136,8 @@ public class Control
 							case "/settings":
 								Settings();
 							break;
-							case "/start":
-								Start();
+							case "/startGame":
+								StartGame();
 							break;
 							case "/end":
 								EndGame();
@@ -148,6 +156,11 @@ public class Control
 		     }
 		     return UpdatesListener.CONFIRMED_UPDATES_ALL;
 		 });
+	}
+	
+	private void Start()
+	{
+		db.AddUserdb(update.message().from().id(), update.message().from().firstName().toString());
 	}
 	
 	private void Helper()
@@ -211,7 +224,7 @@ public class Control
 		bot.execute(new SendMessage(update.message().from().id(), "Step !"));
 	}
 	
-	private void Start()
+	private void StartGame()
 	{
 		bot.execute(new SendMessage(update.message().from().id(), "Start !"));
 	}
