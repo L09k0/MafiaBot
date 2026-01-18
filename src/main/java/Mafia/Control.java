@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -158,7 +159,7 @@ public class Control
 		 });
 	}
 	
-	private void Start()
+	private void Start() throws SQLException
 	{
 		db.AddUserdb(update.message().from().id(), update.message().from().firstName().toString());
 	}
@@ -209,9 +210,17 @@ public class Control
 		bot.execute(new SendMessage(update.message().from().id(), "Leave !"));
 	}
 	
-	private void Profil()
+	private void Profil() throws SQLException
 	{
-		bot.execute(new SendMessage(update.message().from().id(), "Profil !"));
+		People pop;
+				
+		pop = db.getUserTgID(update.message().from().id());
+	
+		bot.execute(new SendMessage
+				(
+			    update.message().from().id(), 
+			    pop.getGameUserNick() + "\n" + pop.getID() + "\n" + pop.getPublicID()
+			));
 	}
 	
 	private void EditProfil()
