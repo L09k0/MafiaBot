@@ -58,6 +58,42 @@ public class Database
         }
 	}
 	
+	public boolean setUserEditProfile(String game_username, long tg_id)
+	{    	
+    	try
+    	{
+    		sql = "SELECT game_username FROM users WHERE tg_id = ?";
+    		PreparedStatement stmt = conn.prepareStatement(sql);
+    		stmt.setLong(1, tg_id);
+    		ResultSet result = stmt.executeQuery();
+    		
+    		if (!result.next()) 
+    		{
+    			System.out.println("User not found: " + tg_id);
+    			return false;
+    		}
+    		
+        	sql = "UPDATE users SET game_username = ? WHERE tg_id = ?";
+	    	stmt = conn.prepareStatement(sql);
+	    	stmt.setString(1, game_username);
+	    	stmt.setLong(2, tg_id);
+			
+			
+			String oldNick = result.getString("game_username");
+	        if (stmt.executeUpdate() > 0) 
+	            System.out.println("Changed Nick: " + oldNick + " to " + game_username + "\n");   
+	        else
+	        	return false;
+    	}
+    	catch(SQLException e)
+    	{
+    		System.out.println(e.getMessage());
+    		return false;
+    	}
+		
+    	return true;
+	}
+	
 	public People getUserTgID(long tg_id) throws SQLException
 	{
 		People pop = new People();

@@ -121,11 +121,18 @@ public class Control
 							case "/leave":
 								Leave();
 							break;
-							case "/profil":
-								Profil();
+							case "/profile":
+								Profile();
 							break;
-							case "/editprofil":
-								EditProfil();
+							case "/editprofile":
+								if(agrc.length > 1)
+								{
+									EditProfile(agrc[1]);
+								}
+								else 
+								{
+									bot.execute(new SendMessage(chatId, "Введите новый ник !"));
+								}
 							break;
 							
 							// Leading use 
@@ -180,8 +187,8 @@ public class Control
 				+ "/kill - Убить игрока\n"
 				+ "/cure - Лечить игрока\n"
 				+ "/check - Проверить игрока\n"
-				+ "/profil - Посмотреть ваш профиль\n"
-				+ "/editprofil - Редактировать ваш профиль\n";
+				+ "/profile - Посмотреть ваш профиль\n"
+				+ "/editprofile - Редактировать ваш профиль\n";
 		
 		bot.execute(new SendMessage(update.message().from().id(), str));
 	}
@@ -211,7 +218,7 @@ public class Control
 		bot.execute(new SendMessage(update.message().from().id(), "Leave !"));
 	}
 	
-	private void Profil() throws SQLException
+	private void Profile() throws SQLException
 	{
 		People pop;	
 		pop = db.getUserTgID(update.message().from().id());
@@ -227,9 +234,12 @@ public class Control
 			    .parseMode(ParseMode.Markdown));
 	}
 	
-	private void EditProfil()
+	private void EditProfile(String chenNick)
 	{
-		bot.execute(new SendMessage(update.message().from().id(), "editprofil !"));
+		if(db.setUserEditProfile(chenNick, update.message().from().id()))
+			bot.execute(new SendMessage(update.message().from().id(), "Ник изменен !"));
+		else
+			bot.execute(new SendMessage(update.message().from().id(), "Не удалось поменять ник !"));
 	}
 	
 	private void Step()
