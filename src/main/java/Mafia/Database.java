@@ -13,7 +13,6 @@ public class Database
 	private String namedb;
 	private Connection conn = null;
 	private String sql;
-	private PreparedStatement pstmt;
 	
 	public Database(String nameDB) 
 	{
@@ -64,9 +63,9 @@ public class Database
 		People pop = new People();
 		
 		String sql = "SELECT * FROM users WHERE tg_id = ?";
-		PreparedStatement pstmt = conn.prepareStatement(sql);
-		pstmt.setLong(1, tg_id);
-		ResultSet result = pstmt.executeQuery();
+		PreparedStatement stmt = conn.prepareStatement(sql);
+		stmt.setLong(1, tg_id);
+		ResultSet result = stmt.executeQuery();
 
 		if (result.next()) 
 		{
@@ -80,45 +79,66 @@ public class Database
 		}
 	}
 	
+	private boolean userExists(long tg_id) throws SQLException 
+	{
+	    sql = "SELECT tg_id FROM users WHERE tg_id = ?";
+	    try (PreparedStatement stmt = conn.prepareStatement(sql)) 
+	    {
+	    	stmt.setLong(1, tg_id);
+	        ResultSet result = stmt.executeQuery();
+	        return result.next(); 
+	    }
+	}
+	
+	private boolean publicIdExists(long public_id) throws SQLException 
+	{
+	    sql = "SELECT public_id FROM users WHERE public_id = ?";
+	    
+	    try (PreparedStatement stmt = conn.prepareStatement(sql)) 
+	    {
+	    	stmt.setLong(1, public_id);
+	        ResultSet result = stmt.executeQuery();
+	        return result.next();
+	    }
+	}
+	
 	public void AddUserdb(long tg_id, String tg_username) throws SQLException
 	{
 		long public_id = ThreadLocalRandom.current().nextLong(10000, 10000000);
 		String game_username = tg_username;
-		
-		sql = "SELECT tg_id FROM users WHERE tg_id = ?";
-		pstmt = conn.prepareStatement(sql);
-		pstmt.setLong(1, tg_id);
-		ResultSet rs = pstmt.executeQuery();
+		PreparedStatement stmt;
 
-		try (PreparedStatement checkStmt = conn.prepareStatement(sql)) 
+		try 
 		{
-	        checkStmt.setLong(1, tg_id);
-	        rs = checkStmt.executeQuery();
-	        
-	        if (!rs.next()) 
+	        if (userExists(tg_id)) 
 	        {
-	            String insertSql = "INSERT INTO users (tg_id, public_id, tg_username, game_username) "
+	        	System.out.println("User already exist: " + tg_username + " " + tg_id + "\n");
+	        }
+	        else
+	        {
+
+			    do {
+			        public_id = ThreadLocalRandom.current().nextLong(10000, 10000000);   
+			    } while (publicIdExists(public_id));
+			
+				
+	        	sql = "INSERT INTO users (tg_id, public_id, tg_username, game_username) "
 	                             + "VALUES (?, ?, ?, ?)";
 	            
-	            try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) 
-	            {
-	                insertStmt.setLong(1, tg_id);
-	                insertStmt.setLong(2, public_id);
-	                insertStmt.setString(3, tg_username);
-	                insertStmt.setString(4, game_username);
-	                
-	                if (insertStmt.executeUpdate() > 0) 
-	                {
-	                    System.out.println("Add user: " + tg_username + " " + tg_id + "\n");   
-	                }
-	            }
-	        } 
-	        else 
-	        {
-	        	 System.out.println("User already exist: " + tg_username + " " + tg_id + "\n");   
+	        	stmt = conn.prepareStatement(sql);
+
+				stmt.setLong(1, tg_id);
+				stmt.setLong(2, public_id);
+				stmt.setString(3, tg_username);
+				stmt.setString(4, game_username);
+                
+                if (stmt.executeUpdate() > 0) 
+                {
+                    System.out.println("Add user: " + tg_username + " " + tg_id + "\n");   
+		        } 
 	        }
-	    } 
-	  	catch (SQLException e) 
+		}
+		catch (SQLException e) 
 	  	{
 	        System.err.println(e.getMessage());
 	    }

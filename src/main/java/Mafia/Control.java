@@ -13,6 +13,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
 
 @SuppressWarnings("unused")
@@ -212,15 +213,18 @@ public class Control
 	
 	private void Profil() throws SQLException
 	{
-		People pop;
-				
+		People pop;	
 		pop = db.getUserTgID(update.message().from().id());
 	
-		bot.execute(new SendMessage
-				(
-			    update.message().from().id(), 
-			    pop.getGameUserNick() + "\n" + pop.getID() + "\n" + pop.getPublicID()
-			));
+		if(pop.getID() == 0)
+			db.AddUserdb(update.message().from().id(), update.message().from().firstName().toString());
+		
+		String str = "*Ваш профиль:*\n\n"
+				+ "Ник: `" + pop.getGameUserNick() + "`\n"
+				+ "Индификатор: `" + pop.getPublicID() + "`";
+		
+		bot.execute(new SendMessage(update.message().from().id(), str)
+			    .parseMode(ParseMode.Markdown));
 	}
 	
 	private void EditProfil()
