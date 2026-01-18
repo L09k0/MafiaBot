@@ -2,33 +2,6 @@ package Mafia;
 
 public class People
 {
-	public People() 
-	{
-		System.out.println("People");
-	}
-	
-	private enum Suits
-	{
-		PEOPLE,
-		MAFIA,
-		DORTOR,
-		SHERIFF
-	}
-	
-	private enum State
-	{
-		DIE,
-		LIVE
-	}
-	
-	private enum Status
-	{
-		CURED,
-		CHECK
-	}
-	
-	private Suits suit;
-	private State state;
 	private String game_username;
 	private long id;
 	private long public_id;

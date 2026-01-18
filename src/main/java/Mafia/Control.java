@@ -1,13 +1,9 @@
 package Mafia;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.sql.SQLException;
-import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.pengrad.telegrambot.TelegramBot;
@@ -16,30 +12,16 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
 
-@SuppressWarnings("unused")
+@SuppressWarnings("deprecation")
 public class Control 
 {
 	// bot
 	private TelegramBot bot;
 	private Update update;
-
-	// People
-	private int people_length;
-	private People leading = new People();
 	
 	// Control
-	private boolean day;
 	private long id_lobby = 0;
-	private boolean is_game; 
 	private Database db;
-	
-	// MOVE step
-	private enum StepPlay
-	{
-	   MAFIA,
-	   DOCTOR,
-	   SHERIFF
-	}
 
 	private String getBotToken() throws IOException
 	{
@@ -79,6 +61,8 @@ public class Control
 						
 						long chatId = update.message().chat().id();
 						
+						if(!db.userExists(update.message().from().id()))
+							db.AddUserdb(update.message().from().id(), update.message().from().firstName().toString());
 						
 						switch (command) 
 						{
@@ -169,7 +153,8 @@ public class Control
 	
 	private void Start() throws SQLException
 	{
-		db.AddUserdb(update.message().from().id(), update.message().from().firstName().toString());
+		if(!db.userExists(update.message().from().id()))
+			db.AddUserdb(update.message().from().id(), update.message().from().firstName().toString());
 	}
 	
 	private void Helper()

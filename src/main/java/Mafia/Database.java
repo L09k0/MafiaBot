@@ -52,7 +52,7 @@ public class Database
             stmt.execute(sql);
             System.out.println("Table create !\n");
         } 
-        catch (SQLException e) 
+        catch (SQLException e)
         {
             System.out.println(e.getMessage());
         }
@@ -115,7 +115,7 @@ public class Database
 		}
 	}
 	
-	private boolean userExists(long tg_id) throws SQLException 
+	public boolean userExists(long tg_id) throws SQLException 
 	{
 	    sql = "SELECT tg_id FROM users WHERE tg_id = ?";
 	    try (PreparedStatement stmt = conn.prepareStatement(sql)) 
