@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,7 +22,7 @@ public class Control
 	private Update update;
 	
 	// Control
-	private long id_lobby = 0;
+
 	private Database db;
 	private Map<String, Session> activeSessions = new HashMap<>();
 
@@ -87,7 +86,7 @@ public class Control
 									join(agrc[1]);
 								}
 								else
-									bot.execute(new SendMessage(chatId, "Введите индификатор лобби !" + String.valueOf(id_lobby)));
+									bot.execute(new SendMessage(chatId, "Введите индификатор лобби !"));
 							break;
 							case "/vote":
 								Vote();
@@ -180,6 +179,81 @@ public class Control
 		bot.execute(new SendMessage(update.message().from().id(), str));
 	}
 
+	private void Create() throws SQLException 
+	{
+		Player plr = new Player();
+		plr = db.getUserTgID(update.message().from().id());
+		
+		for (Entry<String, Session> list : activeSessions.entrySet())
+		{
+			for (Entry<Long, Player> pl : list.getValue().getPlayer().entrySet())
+			{
+				if(pl.getValue().getUserID() == update.message().from().id())
+				{
+					bot.execute(new SendMessage(update.message().from().id(), "Вы уже в игре ! `" + String.valueOf(list.getValue().getSessionID()) + "`").parseMode(ParseMode.Markdown));
+					return;
+				}
+			}
+		}
+		
+		Session newSession = new Session();
+		String lobbyCode = Long.toString(newSession.NewSession());
+		
+		do {
+		    lobbyCode = Long.toString(newSession.NewSession());
+		} while (activeSessions.containsKey(lobbyCode));
+		
+		activeSessions.put(lobbyCode, newSession);
+		activeSessions.get(lobbyCode).AddPlayer(plr);
+		
+		bot.execute(new SendMessage(update.message().from().id(), "Creating new lobby `" + lobbyCode + "`").parseMode(ParseMode.Markdown));
+	}
+	
+	private void join(String lobbyCode) throws SQLException
+	{
+		long chatId = update.message().chat().id();
+		
+		if (activeSessions.containsKey(lobbyCode)) 
+		{	
+			Player plr = new Player();
+			
+			plr = db.getUserTgID(update.message().from().id());
+			
+			if (activeSessions.get(lobbyCode).AddPlayer(plr))
+				bot.execute(new SendMessage(chatId, "Ты присоединился в лобби !"));
+			else 
+				bot.execute(new SendMessage(chatId, "Не удалось присоединился в лобби !"));
+	    } 
+		else 
+		{
+	        bot.execute(new SendMessage(chatId, "Лобби не найдено !"));
+	    }
+	}
+	
+	private void Leave() throws SQLException
+	{	
+		if (activeSessions.isEmpty())
+			bot.execute(new SendMessage(update.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+		
+		for (Entry<String, Session> list : activeSessions.entrySet())
+		{		
+			for (Entry<Long, Player> plr : list.getValue().getPlayer().entrySet())
+			{
+				if(plr.getValue().getUserID() == update.message().from().id())
+				{
+					activeSessions.get(String.valueOf(list.getValue().getSessionID())).RemovePlayer(plr.getKey());
+					
+					if(list.getValue().getPlayer().isEmpty())
+					{
+						activeSessions.remove(String.valueOf(list.getValue().getSessionID()));
+						bot.execute(new SendMessage(update.message().from().id(), "Вы вышли из игры !").parseMode(ParseMode.Markdown));
+						return;
+					}
+				}
+			}
+		}
+	}
+	
 	private void ListManager(String[] agrc) 
 	{
 		String str = "";
@@ -240,11 +314,6 @@ public class Control
 		bot.execute(new SendMessage(update.message().from().id(), "Check !"));
 	}
 	
-	private void Leave()
-	{
-		bot.execute(new SendMessage(update.message().from().id(), "Leave !"));
-	}
-	
 	private void Profile() throws SQLException
 	{
 		Player pop = new Player();	
@@ -282,60 +351,10 @@ public class Control
 	
 	private void Settings()
 	{
-		bot.execute(new SendMessage(update.message().from().id(), "Creating new lobby dfdsf !" + id_lobby));	
+		bot.execute(new SendMessage(update.message().from().id(), "Creating new lobby dfdsf !"));	
 		
 	}
-	
-	private void Create() throws SQLException 
-	{
-		Player plr = new Player();
-		plr = db.getUserTgID(update.message().from().id());
-		
-		for (Entry<String, Session> list : activeSessions.entrySet())
-		{
-			for (Entry<Long, Player> pl : list.getValue().getPlayer().entrySet())
-			{
-				if(pl.getValue().getUserID() == update.message().from().id() || pl.getValue().getUserID() == 0)
-				{
-					bot.execute(new SendMessage(update.message().from().id(), "Вы уже в игре ! `" + String.valueOf(list.getValue().getSessionID()) + "`").parseMode(ParseMode.Markdown));
-					return;
-				}
-			}
-		}
-		
-		Session newSession = new Session();
-		String lobbyCode = Long.toString(newSession.NewSession());
-		
-		do {
-		    lobbyCode = Long.toString(newSession.NewSession());
-		} while (activeSessions.containsKey(lobbyCode));
-		
-		activeSessions.put(lobbyCode, newSession);
-		activeSessions.get(lobbyCode).AddPlayer(plr);
-		
-		bot.execute(new SendMessage(update.message().from().id(), "Creating new lobby `" + lobbyCode + "`").parseMode(ParseMode.Markdown));
-	}
-	
-	private void join(String lobbyCode) throws SQLException
-	{
-		long chatId = update.message().chat().id();
-		
-		if (activeSessions.containsKey(lobbyCode)) 
-		{	
-			Player plr = new Player();
-			
-			plr = db.getUserTgID(update.message().from().id());
-			
-			if (activeSessions.get(lobbyCode).AddPlayer(plr))
-				bot.execute(new SendMessage(chatId, "Ты присоединился в лобби !"));
-			else 
-				bot.execute(new SendMessage(chatId, "Не удалось присоединился в лобби !"));
-	    } 
-		else 
-		{
-	        bot.execute(new SendMessage(chatId, "Лобби не найдено !"));
-	    }
-	}
+
 }
 
 

@@ -2,7 +2,6 @@ package Mafia;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Session 
@@ -48,6 +47,13 @@ public class Session
 	public boolean AddPlayer(Player plr)
 	{
 		players.put(plr.getPublicID(), plr);
+		
+		return true;
+	}
+	
+	public boolean RemovePlayer(long public_id)
+	{
+		players.remove(public_id);
 		
 		return true;
 	}
