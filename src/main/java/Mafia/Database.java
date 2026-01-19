@@ -44,7 +44,7 @@ public class Database
         		   + "tg_id BIGINT NOT NULL,"
         		   + "public_id BIGINT NOT NULL,"
         		   + "tg_username VARCHAR(64) NOT NULL,"
-        		   + "game_username VARCHAR(64) NOT NULL"
+        		   + "nickname VARCHAR(64) NOT NULL"
         		   + ");";
 	
         try (Statement stmt = conn.createStatement()) 
@@ -58,11 +58,11 @@ public class Database
         }
 	}
 	
-	public boolean setUserEditProfile(String game_username, long tg_id)
+	public boolean setUserEditProfile(String nickname, long tg_id)
 	{    	
     	try
     	{
-    		sql = "SELECT game_username FROM users WHERE tg_id = ?";
+    		sql = "SELECT nickname FROM users WHERE tg_id = ?";
     		PreparedStatement stmt = conn.prepareStatement(sql);
     		stmt.setLong(1, tg_id);
     		ResultSet result = stmt.executeQuery();
@@ -73,15 +73,15 @@ public class Database
     			return false;
     		}
     		
-        	sql = "UPDATE users SET game_username = ? WHERE tg_id = ?";
+        	sql = "UPDATE users SET nickname = ? WHERE tg_id = ?";
 	    	stmt = conn.prepareStatement(sql);
-	    	stmt.setString(1, game_username);
+	    	stmt.setString(1, nickname);
 	    	stmt.setLong(2, tg_id);
 			
 			
-			String oldNick = result.getString("game_username");
+			String oldNick = result.getString("nickname");
 	        if (stmt.executeUpdate() > 0) 
-	            System.out.println("Changed Nick: " + oldNick + " to " + game_username + "\n");   
+	            System.out.println("Changed Nick: " + oldNick + " to " + nickname + "\n");   
 	        else
 	        	return false;
     	}
@@ -105,12 +105,12 @@ public class Database
 
 		if (result.next()) 
 		{
-			pop.setUserDB(result.getLong("id"), result.getLong("public_id"), result.getString("game_username"));
+			pop.setUserDB(result.getLong("id"), result.getLong("public_id"), result.getString("nickname"));
 			return pop;
 		}
 		else 
 		{
-			System.out.println("People init error !\n");
+			System.out.println("Player init error !\n");
 			return pop.NULL();
 		}
 	}
@@ -158,8 +158,7 @@ public class Database
 			    } while (publicIdExists(public_id));
 			
 				
-	        	sql = "INSERT INTO users (tg_id, public_id, tg_username, game_username) "
-	                             + "VALUES (?, ?, ?, ?)";
+	        	sql = "INSERT INTO users (tg_id, public_id, tg_username, nickname) VALUES (?, ?, ?, ?)";
 	            
 	        	stmt = conn.prepareStatement(sql);
 

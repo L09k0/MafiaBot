@@ -210,8 +210,7 @@ public class Control
 				+ "Ник: `" + pop.getGameUserNick() + "`\n"
 				+ "Индификатор: `" + pop.getPublicID() + "`";
 		
-		bot.execute(new SendMessage(update.message().from().id(), str)
-			    .parseMode(ParseMode.Markdown));
+		bot.execute(new SendMessage(update.message().from().id(), str).parseMode(ParseMode.Markdown));
 	}
 	
 	private void EditProfile(String chenNick)
