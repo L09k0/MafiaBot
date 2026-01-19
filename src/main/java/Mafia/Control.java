@@ -283,6 +283,36 @@ public class Control
 						}
 					}
 				break;
+				case "players":
+					
+					if (activeSessions.isEmpty())
+					{
+						bot.execute(new SendMessage(update.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+						return;
+					}
+					
+					str += "*Список игроков в игре:*\n";
+					for (Entry<String, Session> list : activeSessions.entrySet())
+					{		
+						for (Entry<Long, Player> plr : list.getValue().getPlayer().entrySet())
+						{
+							if(plr.getValue().getUserID() == update.message().from().id())
+							{
+								activeSessions.get(String.valueOf(list.getValue().getSessionID())).RemovePlayer(plr.getKey());
+								
+								if(list.getValue().getPlayer().isEmpty())
+								{
+									str += 
+											  "----------------------------------\n"				
+										    + "Ник: `" + plr.getValue().getGameUserNick() + "`\n" 
+										    + "Индификатор: `" + plr.getValue().getPublicID() + "`\n";
+								}
+							}
+							else
+								str += "Вас нету в игре !";
+						}
+					}
+				break;
 				default:
 					str += "Неправильный аргумент !";
 				break;
