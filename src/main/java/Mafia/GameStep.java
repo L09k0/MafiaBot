@@ -1,0 +1,12 @@
+package Mafia;
+
+public enum GameStep
+{
+	MAFIA_ACTION,
+	DOCTOR_ACTION,
+	DETECTIVE_ACTION,
+	DAY_DISCUSSION,
+	DAY_VOTING,
+	DAY_VOTING_ENG,
+	DAY_LAST_WORD
+}

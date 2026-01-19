@@ -94,9 +94,9 @@ public class Database
     	return true;
 	}
 	
-	public People getUserTgID(long tg_id) throws SQLException
+	public Player getUserTgID(long tg_id) throws SQLException
 	{
-		People pop = new People();
+		Player pop = new Player();
 		
 		String sql = "SELECT * FROM users WHERE tg_id = ?";
 		PreparedStatement stmt = conn.prepareStatement(sql);

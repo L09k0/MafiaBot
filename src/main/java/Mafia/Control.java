@@ -5,6 +5,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
@@ -22,6 +24,7 @@ public class Control
 	// Control
 	private long id_lobby = 0;
 	private Database db;
+	private Map<String, Session> activeSessions = new HashMap<>();
 
 	private String getBotToken() throws IOException
 	{
@@ -80,12 +83,7 @@ public class Control
 							case "/join":
 								if(agrc.length > 1)
 								{
-									if(agrc[1].equals(String.valueOf(id_lobby)))
-									{
-										bot.execute(new SendMessage(chatId, "Ты присоединился в лобби !"));
-									}
-									else
-										bot.execute(new SendMessage(chatId, "Лобби не найдено !"));
+									join(agrc[1]);
 								}
 								else
 									bot.execute(new SendMessage(chatId, "Введите индификатор лобби !" + String.valueOf(id_lobby)));
@@ -205,11 +203,8 @@ public class Control
 	
 	private void Profile() throws SQLException
 	{
-		People pop;	
+		Player pop;	
 		pop = db.getUserTgID(update.message().from().id());
-	
-		if(pop.getID() == 0)
-			db.AddUserdb(update.message().from().id(), update.message().from().firstName().toString());
 		
 		String str = "*Ваш профиль:*\n\n"
 				+ "Ник: `" + pop.getGameUserNick() + "`\n"
@@ -248,10 +243,28 @@ public class Control
 		
 	}
 	
-	public void Create() 
+	private void Create() 
 	{
-		id_lobby = ThreadLocalRandom.current().nextLong(10000, 1000000);
-		bot.execute(new SendMessage(update.message().from().id(), "Creating new lobby "+id_lobby));
+		Session newSession = new Session();
+		String lobbyCode = Long.toString(newSession.NewSession());
+		
+		activeSessions.put(lobbyCode, newSession);
+		
+		bot.execute(new SendMessage(update.message().from().id(), "Creating new lobby `" + lobbyCode + "`").parseMode(ParseMode.Markdown));
+	}
+	
+	private void join(String lobbyCode)
+	{
+		long chatId = update.message().chat().id();
+		
+		if (activeSessions.containsKey(lobbyCode)) 
+		{	
+			bot.execute(new SendMessage(chatId, "Ты присоединился в лобби !"));
+	    } 
+		else 
+		{
+	        bot.execute(new SendMessage(chatId, "Лобби не найдено !"));
+	    }
 	}
 }
 
