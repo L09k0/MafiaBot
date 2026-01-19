@@ -118,30 +118,7 @@ public class Control
 								}
 							break;
 							case "/list":
-								if(agrc.length > 1)
-								{
-									switch (agrc[1])
-									{
-										case "session":
-											for (Entry<String, Session> list : activeSessions.entrySet())
-												bot.execute(new SendMessage(update.message().from().id(), ""+list.getValue().getSessionID()));
-										break;
-										case "players":
-											for (Entry<String, Session> list : activeSessions.entrySet())
-											{
-												for (Entry<Long, Player> plr : list.getValue().getPlayer().entrySet())
-												{
-													bot.execute(new SendMessage(update.message().from().id(), plr.getValue().getGameUserNick() + " " + plr.getValue().getPublicID()));
-												}
-											}
-										break;
-										default:
-											bot.execute(new SendMessage(update.message().from().id(), "Неправильный аргумент !"));
-										break;
-									}
-								}
-								else
-									bot.execute(new SendMessage(chatId, "Напиши /help чтобы узнать список команд !"));
+								ListManager(agrc);
 							break;
 							
 							// Leading use 
@@ -203,6 +180,45 @@ public class Control
 		bot.execute(new SendMessage(update.message().from().id(), str));
 	}
 
+	private void ListManager(String[] agrc) 
+	{
+		String str = "";
+		
+		if(agrc.length > 1)
+		{
+			switch (agrc[1])
+			{
+				case "session":
+					if(activeSessions.values().isEmpty())
+					{
+						bot.execute(new SendMessage(update.message().from().id(), "Нету активных игр !"));
+						return;
+					}
+					
+					str += "*Список активных игр:*\n";
+					for (Entry<String, Session> list : activeSessions.entrySet())
+					{
+						for (Entry<Long, Player> plr : list.getValue().getPlayer().entrySet())
+						{
+							str += 
+								  "----------------------------------\n"
+								+ "Индификатор: `" + String.valueOf(list.getValue().getSessionID()) + "`\n"					
+							    + "Игроки в игре:\n" 
+							    + "\t\t\tНик: `" + plr.getValue().getGameUserNick() + "`\n" 
+							    + "\t\t\tИндификатор: `" + plr.getValue().getPublicID() + "`\n";
+						}
+					}
+				break;
+				default:
+					str += "Неправильный аргумент !";
+				break;
+			}
+			
+			bot.execute(new SendMessage(update.message().from().id(), str).parseMode(ParseMode.Markdown));
+		}
+		else
+			bot.execute(new SendMessage(update.message().from().id(), "Напиши /help чтобы узнать список команд !"));	
+	}
 	
 	private void Vote()
 	{
@@ -270,12 +286,20 @@ public class Control
 		
 	}
 	
-	private void Create() 
+	private void Create() throws SQLException 
 	{
 		Session newSession = new Session();
 		String lobbyCode = Long.toString(newSession.NewSession());
+
+		do {
+		    lobbyCode = Long.toString(newSession.NewSession());
+		} while (activeSessions.containsKey(lobbyCode));
 		
 		activeSessions.put(lobbyCode, newSession);
+		
+		Player plr = new Player();
+		plr = db.getUserTgID(update.message().from().id());
+		activeSessions.get(lobbyCode).AddPlayer(plr);
 		
 		bot.execute(new SendMessage(update.message().from().id(), "Creating new lobby `" + lobbyCode + "`").parseMode(ParseMode.Markdown));
 	}
@@ -290,9 +314,10 @@ public class Control
 			
 			plr = db.getUserTgID(update.message().from().id());
 			
-			activeSessions.get(lobbyCode).AddPlayer(plr);
-		
-			bot.execute(new SendMessage(chatId, "Ты присоединился в лобби !"));
+			if (activeSessions.get(lobbyCode).AddPlayer(plr))
+				bot.execute(new SendMessage(chatId, "Ты присоединился в лобби !"));
+			else 
+				bot.execute(new SendMessage(chatId, "Не удалось присоединился в лобби !"));
 	    } 
 		else 
 		{
