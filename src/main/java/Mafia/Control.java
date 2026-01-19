@@ -288,17 +288,29 @@ public class Control
 	
 	private void Create() throws SQLException 
 	{
+		Player plr = new Player();
+		plr = db.getUserTgID(update.message().from().id());
+		
+		for (Entry<String, Session> list : activeSessions.entrySet())
+		{
+			for (Entry<Long, Player> pl : list.getValue().getPlayer().entrySet())
+			{
+				if(pl.getValue().getUserID() == update.message().from().id() || pl.getValue().getUserID() == 0)
+				{
+					bot.execute(new SendMessage(update.message().from().id(), "Вы уже в игре ! `" + String.valueOf(list.getValue().getSessionID()) + "`").parseMode(ParseMode.Markdown));
+					return;
+				}
+			}
+		}
+		
 		Session newSession = new Session();
 		String lobbyCode = Long.toString(newSession.NewSession());
-
+		
 		do {
 		    lobbyCode = Long.toString(newSession.NewSession());
 		} while (activeSessions.containsKey(lobbyCode));
 		
 		activeSessions.put(lobbyCode, newSession);
-		
-		Player plr = new Player();
-		plr = db.getUserTgID(update.message().from().id());
 		activeSessions.get(lobbyCode).AddPlayer(plr);
 		
 		bot.execute(new SendMessage(update.message().from().id(), "Creating new lobby `" + lobbyCode + "`").parseMode(ParseMode.Markdown));

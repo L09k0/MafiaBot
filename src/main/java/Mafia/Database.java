@@ -105,7 +105,7 @@ public class Database
 
 		if (result.next()) 
 		{
-			pop.setUserDB(result.getLong("id"), result.getLong("public_id"), result.getString("nickname"), result.getString("tg_username"));
+			pop.setUserDB(result.getLong("tg_id"), result.getLong("public_id"), result.getString("nickname"), result.getString("tg_username"));
 			return pop;
 		}
 		else 
