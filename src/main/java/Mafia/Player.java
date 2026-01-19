@@ -2,26 +2,34 @@ package Mafia;
 
 public class Player
 {
+	private String tg_name;
 	private String nickname;
-	private long userId;
+	private long tg_id;
 	private long public_id;
 	
-	public void setUserDB(long userId, long public_id, String game_username)
+	public Player() 
 	{
-		this.userId = userId;
-		this.public_id = public_id;
-		this.nickname = game_username;
+		this.NULL();
 	}
 	
-	public void setUser(long userId, String game_username)
+	public void setUserDB(long tg_id, long public_id, String nickname, String tg_name)
 	{
-		this.userId = userId;
-		this.nickname = game_username;
+		this.tg_id = tg_id;
+		this.public_id = public_id;
+		this.nickname = nickname;
+		this.tg_name = tg_name;
+	}
+	
+	public void setUser(long tg_id, String nickname, String tg_name)
+	{
+		this.tg_id = tg_id;
+		this.nickname = nickname;
+		this.tg_name = tg_name;
 	}
 	
 	public long getUserID()
 	{
-		return this.userId;	
+		return this.tg_id;	
 	}
 	
 	public long getPublicID()
@@ -34,10 +42,16 @@ public class Player
 		return this.nickname;	
 	}
 	
+	public String getTGUserName()
+	{
+		return this.tg_name;	
+	}
+	
 	public Player NULL()
 	{
-		this.userId = 0;
+		this.tg_id = 0;
 		this.public_id = 0;
+		this.tg_name = null;
 		this.nickname = null;
 		
 		return this;

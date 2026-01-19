@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
@@ -116,6 +117,32 @@ public class Control
 									bot.execute(new SendMessage(chatId, "Введите новый ник !"));
 								}
 							break;
+							case "/list":
+								if(agrc.length > 1)
+								{
+									switch (agrc[1])
+									{
+										case "session":
+											for (Entry<String, Session> list : activeSessions.entrySet())
+												bot.execute(new SendMessage(update.message().from().id(), ""+list.getValue().getSessionID()));
+										break;
+										case "players":
+											for (Entry<String, Session> list : activeSessions.entrySet())
+											{
+												for (Entry<Long, Player> plr : list.getValue().getPlayer().entrySet())
+												{
+													bot.execute(new SendMessage(update.message().from().id(), plr.getValue().getGameUserNick() + " " + plr.getValue().getPublicID()));
+												}
+											}
+										break;
+										default:
+											bot.execute(new SendMessage(update.message().from().id(), "Неправильный аргумент !"));
+										break;
+									}
+								}
+								else
+									bot.execute(new SendMessage(chatId, "Напиши /help чтобы узнать список команд !"));
+							break;
 							
 							// Leading use 
 							case "/step":
@@ -175,6 +202,7 @@ public class Control
 		
 		bot.execute(new SendMessage(update.message().from().id(), str));
 	}
+
 	
 	private void Vote()
 	{
@@ -203,7 +231,7 @@ public class Control
 	
 	private void Profile() throws SQLException
 	{
-		Player pop;	
+		Player pop = new Player();	
 		pop = db.getUserTgID(update.message().from().id());
 		
 		String str = "*Ваш профиль:*\n\n"
@@ -252,12 +280,18 @@ public class Control
 		bot.execute(new SendMessage(update.message().from().id(), "Creating new lobby `" + lobbyCode + "`").parseMode(ParseMode.Markdown));
 	}
 	
-	private void join(String lobbyCode)
+	private void join(String lobbyCode) throws SQLException
 	{
 		long chatId = update.message().chat().id();
 		
 		if (activeSessions.containsKey(lobbyCode)) 
 		{	
+			Player plr = new Player();
+			
+			plr = db.getUserTgID(update.message().from().id());
+			
+			activeSessions.get(lobbyCode).AddPlayer(plr);
+		
 			bot.execute(new SendMessage(chatId, "Ты присоединился в лобби !"));
 	    } 
 		else 

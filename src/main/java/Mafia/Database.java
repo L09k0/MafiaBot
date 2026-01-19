@@ -105,7 +105,7 @@ public class Database
 
 		if (result.next()) 
 		{
-			pop.setUserDB(result.getLong("id"), result.getLong("public_id"), result.getString("nickname"));
+			pop.setUserDB(result.getLong("id"), result.getLong("public_id"), result.getString("nickname"), result.getString("tg_username"));
 			return pop;
 		}
 		else 
@@ -141,7 +141,7 @@ public class Database
 	public void AddUserdb(long tg_id, String tg_username) throws SQLException
 	{
 		long public_id = ThreadLocalRandom.current().nextLong(10000, 10000000);
-		String game_username = tg_username;
+		String nickname = tg_username;
 		PreparedStatement stmt;
 
 		try 
@@ -165,7 +165,7 @@ public class Database
 				stmt.setLong(1, tg_id);
 				stmt.setLong(2, public_id);
 				stmt.setString(3, tg_username);
-				stmt.setString(4, game_username);
+				stmt.setString(4, nickname);
                 
                 if (stmt.executeUpdate() > 0) 
                 {
