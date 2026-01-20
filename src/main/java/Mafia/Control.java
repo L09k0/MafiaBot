@@ -76,7 +76,10 @@ public class Control
 
 							// help 
 							case "/help":
-								Helper();
+								if(agrc.length > 1)
+									Helper(agrc[1]);
+								else
+									Helper(null);
 							break;
 	
 							// People use
@@ -158,25 +161,11 @@ public class Control
 			db.AddUserdb(update.message().from().id(), update.message().from().firstName().toString());
 	}
 	
-	private void Helper()
+	private void Helper(String agrc) throws IOException
 	{
-		String str = "Вы можете использовать\n"
-				+ "/help - Помощь в управлении\n"
-				+ "/create - Создание лобби\n"
-				+ "/end - Закончить игру\n"
-				+ "/start - Начать игру\n"
-				+ "/leave - Покинуть лобби/игру\n"
-				+ "/join - Присоединиться в лобби\n"
-				+ "/settings - Настройки лобби/игры\n"
-				+ "/step - Управление ходом\n"
-				+ "/vote - Голосование\n"
-				+ "/kill - Убить игрока\n"
-				+ "/cure - Лечить игрока\n"
-				+ "/check - Проверить игрока\n"
-				+ "/profile - Посмотреть ваш профиль\n"
-				+ "/editprofile - Редактировать ваш профиль\n";
-		
-		bot.execute(new SendMessage(update.message().from().id(), str));
+	    HelperList hpl = new HelperList();
+	    String helpText = hpl.HelpList(agrc); 
+	    bot.execute(new SendMessage(update.message().from().id(), helpText).parseMode(ParseMode.Markdown));
 	}
 
 	private void Create() throws SQLException 
