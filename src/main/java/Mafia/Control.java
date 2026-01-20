@@ -155,7 +155,45 @@ public class Control
 		 });
 	}
 	
-	private void Start() throws SQLException
+	private boolean existPlayerSession(long plrID)
+	{
+		if (activeSessions.isEmpty())
+			return false;
+		
+		for (Entry<String, Session> list : activeSessions.entrySet())
+		{		
+			for (Entry<Long, Player> plr : list.getValue().getPlayer().entrySet())
+			{
+				if(plr.getValue().getUserID() == update.message().from().id())
+					return true;
+				else
+					return false;
+			}
+		}
+		
+		return false;
+	}
+
+	private long getActiveSessionID(long plrID)
+	{
+		if (activeSessions.isEmpty())
+			return 0;
+		
+		for (Entry<String, Session> list : activeSessions.entrySet())
+		{		
+			for (Entry<Long, Player> plr : list.getValue().getPlayer().entrySet())
+			{
+				if(plr.getValue().getUserID() == update.message().from().id())
+					return list.getValue().getSessionID();
+				else
+					return 0;
+			}
+		}
+		
+		return 0;
+	}
+	
+ 	private void Start() throws SQLException
 	{
 		if(!db.userExists(update.message().from().id()))
 			db.AddUserdb(update.message().from().id(), update.message().from().firstName().toString());
@@ -368,10 +406,9 @@ public class Control
 		bot.execute(new SendMessage(update.message().from().id(), "EndGame !"));
 	}
 	
-	private void Settings()
-	{
-		bot.execute(new SendMessage(update.message().from().id(), "Creating new lobby dfdsf !"));	
-		
+	private void Settings() throws SQLException
+	{	
+
 	}
 
 }

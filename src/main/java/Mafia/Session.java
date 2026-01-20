@@ -8,7 +8,7 @@ public class Session
 {
 	// Indicator
 	private long sessionID;
-	//private SessionSettings sSettings = new SessionSettings();
+	private SessionSettings Settings = new SessionSettings();
 	
 	// State
 	//private GameState currentState;
@@ -56,6 +56,11 @@ public class Session
 		players.remove(public_id);
 		
 		return true;
+	}
+	
+	public int getPlayerCount()
+	{
+		return Settings.getPlayerCount();
 	}
 }
 
