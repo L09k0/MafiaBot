@@ -60,6 +60,7 @@ public class Session
 	
 	public int getPlayerCount()
 	{
+		Settings.SetDefault();
 		return Settings.getPlayerCount();
 	}
 }

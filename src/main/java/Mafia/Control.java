@@ -162,35 +162,26 @@ public class Control
 		
 		for (Entry<String, Session> list : activeSessions.entrySet())
 		{		
-			for (Entry<Long, Player> plr : list.getValue().getPlayer().entrySet())
-			{
-				if(plr.getValue().getUserID() == update.message().from().id())
-					return true;
-				else
-					return false;
-			}
+			if(list.getValue().getPlayer().containsKey(plrID))
+				return true;
 		}
 		
 		return false;
 	}
 
-	private long getActiveSessionID(long plrID)
+	private String getActiveSessionID(long plrID)
 	{
 		if (activeSessions.isEmpty())
-			return 0;
+			return null;
 		
 		for (Entry<String, Session> list : activeSessions.entrySet())
-		{		
-			for (Entry<Long, Player> plr : list.getValue().getPlayer().entrySet())
-			{
-				if(plr.getValue().getUserID() == update.message().from().id())
-					return list.getValue().getSessionID();
-				else
-					return 0;
-			}
+		{	
+	        if (list.getValue().getPlayer().containsKey(plrID)) 
+	        {
+	            return list.getKey();
+	        }
 		}
-		
-		return 0;
+		return null;
 	}
 	
  	private void Start() throws SQLException
@@ -408,7 +399,13 @@ public class Control
 	
 	private void Settings() throws SQLException
 	{	
-
+		Player plr = new Player();
+		plr = db.getUserTgID(update.message().from().id());
+		
+		if(existPlayerSession(plr.getPublicID()))
+		{
+			bot.execute(new SendMessage(update.message().from().id(), String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getPlayerCount())));
+		}
 	}
 
 }
