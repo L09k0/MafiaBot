@@ -8,7 +8,7 @@ public class Session
 {
 	// Indicator
 	private long sessionID;
-	private SessionSettings Settings = new SessionSettings();
+	private SessionSettings settings = new SessionSettings();
 	
 	// State
 	//private GameState currentState;
@@ -60,8 +60,122 @@ public class Session
 	
 	public int getPlayerCount()
 	{
-		Settings.SetDefault();
-		return Settings.getPlayerCount();
+		return this.settings.getPlayerCount();
+	}
+	
+	public int getMafiaCount()
+	{
+		return this.settings.getMafiaCount();
+	}
+	
+	public int getDoctorCount()
+	{
+		return this.settings.getDoctorCount();
+	}
+	
+	public int getSheriffCount()
+	{
+		return this.settings.getSheriffCount();
+	}
+	
+	public int getNeutralCount()
+	{
+		return this.settings.getNeutralCount();
+	}
+	
+	public int getNightDuration()
+	{
+		return this.settings.getNightDuration();
+	}
+	
+	public int getDayDuration()
+	{
+		return this.settings.getDayDuration();
+	}
+	
+	public int getDiscussionTime()
+	{
+		return this.settings.getDiscussionTime();
+	}
+	
+	public int getVotingTime()
+	{
+		return this.settings.getVotingTime();
+	}
+	
+	public boolean getShowRolesDeath()
+	{
+		return this.settings.getShowRolesDeath();
+	}
+	
+	public boolean getLastWords()
+	{
+		return this.settings.getLastWords();
+	}
+	
+	public boolean getAnonymoVoting()
+	{
+		return this.settings.getAnonymoVoting();
+	}
+	
+	public void setPlayerCount(int playerCount)
+	{
+		this.settings.setPlayerCount(playerCount);
+	}
+	
+	public void setMafiaCount(int mafiaCount)
+	{
+		this.settings.setMafiaCount(mafiaCount);
+	}
+	
+	public void setDoctorCount(int doctorCount)
+	{
+		this.settings.setDoctorCount(doctorCount);
+	}
+	
+	public void setSheriffCount(int sheriffCount)
+	{
+		this.settings.setSheriffCount(sheriffCount);
+	}
+	
+	public void setNeutralCount(int neutralCount)
+	{
+		this.settings.setNeutralCount(neutralCount);
+	}
+	
+	public void setNightDuration(int nightDuration)
+	{
+		this.settings.setNightDuration(nightDuration);
+	}
+	
+	public void setDayDuration(int dayDuration)
+	{
+		this.settings.setDayDuration(dayDuration);
+	}
+	
+	public void setDiscussionTime(int discussionTime)
+	{
+		this.settings.setDiscussionTime(discussionTime);
+	}
+	
+	public void setVotingTime(int votingTime)
+	{
+		this.settings.setVotingTime(votingTime);
+	}
+	
+	public void setShowRolesDeath(boolean showRolesDeath)
+	{
+		this.settings.setShowRolesDeath(showRolesDeath);
+	}
+	
+	public void setLastWords(boolean lastWords)
+	{
+		this.settings.setLastWords(lastWords);
+	}
+	
+	public void setAnonymoVoting(boolean anonymoVoting)
+	{
+		this.settings.setAnonymoVoting(anonymoVoting);
 	}
 }
 

@@ -19,10 +19,22 @@ public class SettingsCommandHandler
 	private Map<String, CommandInterface> commands = new HashMap<>();
 	private Map<String, Session> activeSessions = new HashMap<>();
 	
-	public SettingsCommandHandler(Map<String, Session> activeSessions) 
+	public SettingsCommandHandler() 
 	{
-		this.activeSessions = activeSessions;
-		CommandRegister("playerCount", this::PlayerCount);
+		CommandRegister("playercount", this::PlayerCount);
+		CommandRegister("mafiacount", this::MafiaCount);
+		CommandRegister("doctorcount", this::DoctorCount);
+		CommandRegister("sheriffcount", this::SheriffCount);
+		CommandRegister("neutralcount", this::NeutralCount);
+		
+		CommandRegister("nightduration", this::NightDuration);
+		CommandRegister("dayduration", this::DayDuration);
+		CommandRegister("discussiontime", this::DiscussionTime);
+		CommandRegister("votingtime", this::VotingTime);
+		
+		CommandRegister("showrolesDeath", this::ShowRolesDeath);
+		CommandRegister("lastwords", this::LastWords);
+		CommandRegister("anonymovoting", this::AnonymoVoting);
 	}
 	
 	private void PlayerCount (String[] mgs, Database db, TelegramBot bot, Update upd) throws SQLException 
@@ -32,8 +44,72 @@ public class SettingsCommandHandler
 		
 		if(existPlayerSession(plr.getPublicID()))
 		{
-			bot.execute(new SendMessage(upd.message().from().id(), String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getPlayerCount())));
+			if (mgs.length == 2)	
+			{
+				bot.execute(new SendMessage(upd.message().from().id(), String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getPlayerCount())));				
+			}
+			else
+			{
+				activeSessions.get(getActiveSessionID(plr.getPublicID())).setPlayerCount(Integer.parseInt(mgs[2]));
+				String str = String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getPlayerCount());
+				bot.execute(new SendMessage(upd.message().from().id(), "Количество игроков изменено на " + str));
+			}
 		}
+	}
+	
+	private void MafiaCount (String[] mgs, Database db, TelegramBot bot, Update upd)
+	{
+		
+	}
+	
+	private void DoctorCount (String[] mgs, Database db, TelegramBot bot, Update upd)
+	{
+		
+	}
+	
+	private void SheriffCount (String[] mgs, Database db, TelegramBot bot, Update upd)
+	{
+		
+	}
+	
+	private void NeutralCount (String[] mgs, Database db, TelegramBot bot, Update upd)
+	{
+		
+	}
+	
+	private void NightDuration (String[] mgs, Database db, TelegramBot bot, Update upd)
+	{
+		
+	}
+	
+	private void DayDuration (String[] mgs, Database db, TelegramBot bot, Update upd)
+	{
+		
+	}
+	
+	private void DiscussionTime (String[] mgs, Database db, TelegramBot bot, Update upd)
+	{
+		
+	}
+	
+	private void VotingTime (String[] mgs, Database db, TelegramBot bot, Update upd)
+	{
+		
+	}
+	
+	private void ShowRolesDeath (String[] mgs, Database db, TelegramBot bot, Update upd)
+	{
+		
+	}
+	
+	private void LastWords (String[] mgs, Database db, TelegramBot bot, Update upd)
+	{
+		
+	}
+	
+	private void AnonymoVoting (String[] mgs, Database db, TelegramBot bot, Update upd)
+	{
+		
 	}
 	
 	private boolean existPlayerSession(long plrID)
@@ -70,8 +146,9 @@ public class SettingsCommandHandler
 		commands.put(name, command);	
 	}
 	
-    public void execute (String[] mgs, Database db, TelegramBot bot, Update upd) throws Exception 
+    public void execute (String[] mgs, Database db, TelegramBot bot, Update upd, Map<String, Session> activeSessions) throws Exception 
     {
+    	this.activeSessions = activeSessions;
     	String command = mgs[1];
     	CommandInterface _command = commands.get(command);
     	if (_command != null) 

@@ -1,6 +1,5 @@
 package Mafia;
 
-@SuppressWarnings("unused")
 public class SessionSettings 
 {
 	// players count
@@ -50,5 +49,120 @@ public class SessionSettings
 	public int getPlayerCount() 
 	{
 		return this.playerCount;
+	}
+	
+	public int getMafiaCount() 
+	{
+		return this.mafiaCount;
+	}
+	
+	public int getDoctorCount() 
+	{
+		return this.doctorCount;
+	}
+	
+	public int getSheriffCount()
+	{
+		return this.sheriffCount;
+	}
+	
+	public int getNeutralCount() 
+	{
+		return this.neutralCount;
+	}
+	
+	public int getNightDuration() 
+	{
+		return this.nightDuration;
+	}
+	
+	public int getDayDuration() 
+	{
+		return this.dayDuration;
+	}
+	
+	public int getDiscussionTime() 
+	{
+		return this.discussionTime;
+	}
+
+	public int getVotingTime() 
+	{
+		return this.votingTime;
+	}
+	
+	public boolean getShowRolesDeath() 
+	{
+		return this.showRolesDeath;
+	}
+	
+	public boolean getLastWords() 
+	{
+		return this.lastWords;
+	}
+	
+	public boolean getAnonymoVoting() 
+	{
+		return this.anonymoVoting;
+	}
+	
+	public void setPlayerCount(int playerCount) 
+	{
+		this.playerCount = playerCount;
+	}
+	
+	public void setMafiaCount(int mafiaCount) 
+	{
+		this.mafiaCount = mafiaCount;
+	}
+	
+	public void setDoctorCount(int doctorCount) 
+	{
+		this.doctorCount = doctorCount;
+	}
+	
+	public void setSheriffCount(int sheriffCount)
+	{
+		this.sheriffCount = sheriffCount;
+	}
+	
+	public void setNeutralCount(int neutralCount) 
+	{
+		this.neutralCount = neutralCount;
+	}
+	
+	public void setNightDuration(int nightDuration) 
+	{
+		this.nightDuration = nightDuration;
+	}
+	
+	public void setDayDuration(int dayDuration) 
+	{
+		this.dayDuration = dayDuration;
+	}
+	
+	public void setDiscussionTime(int discussionTime) 
+	{
+		this.discussionTime = discussionTime;
+	}
+
+	public void setVotingTime(int votingTime) 
+	{
+		this.votingTime = votingTime;
+	}
+	
+	public void setShowRolesDeath(boolean showRolesDeath) 
+	{
+		this.showRolesDeath = showRolesDeath;
+	}
+	
+	public void setLastWords(boolean lastWords) 
+	{
+		this.lastWords = lastWords;
+	}
+	
+	public void setAnonymoVoting(boolean anonymoVoting) 
+	{
+		this.anonymoVoting = anonymoVoting;
 	}
 }

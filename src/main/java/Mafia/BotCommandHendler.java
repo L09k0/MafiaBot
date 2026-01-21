@@ -302,10 +302,10 @@ public class BotCommandHendler
 	
 	private void Settings (Database db, TelegramBot bot, Update upd)  throws Exception
 	{	
-		SettingsCommandHandler setComHand = new SettingsCommandHandler(activeSessions);
+		SettingsCommandHandler setComHand = new SettingsCommandHandler();
     	String[] agrc = upd.message().text().split(" ");
 		
-		setComHand.execute(agrc, db, bot, upd);
+		setComHand.execute(agrc, db, bot, upd, activeSessions);
 	}
 	
     public void execute (String[] mgs, Database db, TelegramBot bot, Update upd) throws Exception 
