@@ -13,7 +13,7 @@ public class SettingsCommandHandler
 {
 	public interface CommandInterface 
 	{
-		void execute(String[] mgs, Database db, TelegramBot bot, Update upd) throws Exception;
+		void execute(String[] mgs, Database db, TelegramBot bot, Update upd) throws Exception, SQLException;
 	}
 	
 	private Map<String, CommandInterface> commands = new HashMap<>();
@@ -44,72 +44,237 @@ public class SettingsCommandHandler
 		
 		if(existPlayerSession(plr.getPublicID()))
 		{
-			if (mgs.length == 2)	
-			{
-				bot.execute(new SendMessage(upd.message().from().id(), String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getPlayerCount())));				
-			}
-			else
+			if (mgs.length >= 3)	
 			{
 				activeSessions.get(getActiveSessionID(plr.getPublicID())).setPlayerCount(Integer.parseInt(mgs[2]));
 				String str = String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getPlayerCount());
 				bot.execute(new SendMessage(upd.message().from().id(), "Количество игроков изменено на " + str));
 			}
+			else
+				bot.execute(new SendMessage(upd.message().from().id(), String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getPlayerCount())));				
 		}
+		else 
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре чтобы использовать настройки !")); 
 	}
 	
-	private void MafiaCount (String[] mgs, Database db, TelegramBot bot, Update upd)
+	private void MafiaCount (String[] mgs, Database db, TelegramBot bot, Update upd) throws SQLException
 	{
+		Player plr = new Player();
+		plr = db.getUserTgID(upd.message().from().id());
 		
+		if(existPlayerSession(plr.getPublicID()))
+		{
+			if (mgs.length >= 3)	
+			{
+				activeSessions.get(getActiveSessionID(plr.getPublicID())).setMafiaCount(Integer.parseInt(mgs[2]));
+				String str = String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getMafiaCount());
+				bot.execute(new SendMessage(upd.message().from().id(), "Количество мафий изменено на " + str));
+			}
+			else
+				bot.execute(new SendMessage(upd.message().from().id(), String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getMafiaCount())));				
+		}
+		else 
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре чтобы использовать настройки !")); 
 	}
 	
-	private void DoctorCount (String[] mgs, Database db, TelegramBot bot, Update upd)
+	private void DoctorCount (String[] mgs, Database db, TelegramBot bot, Update upd) throws SQLException
 	{
+		Player plr = new Player();
+		plr = db.getUserTgID(upd.message().from().id());
 		
+		if(existPlayerSession(plr.getPublicID()))
+		{
+			if (mgs.length >= 3)	
+			{
+				activeSessions.get(getActiveSessionID(plr.getPublicID())).setDoctorCount(Integer.parseInt(mgs[2]));
+				String str = String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getDoctorCount());
+				bot.execute(new SendMessage(upd.message().from().id(), "Количество докторов изменено на " + str));
+			}
+			else
+				bot.execute(new SendMessage(upd.message().from().id(), String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getDoctorCount())));				
+		}
+		else 
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре чтобы использовать настройки !")); 
 	}
 	
-	private void SheriffCount (String[] mgs, Database db, TelegramBot bot, Update upd)
+	private void SheriffCount (String[] mgs, Database db, TelegramBot bot, Update upd) throws SQLException
 	{
+		Player plr = new Player();
+		plr = db.getUserTgID(upd.message().from().id());
 		
+		if(existPlayerSession(plr.getPublicID()))
+		{
+			if (mgs.length >= 3)	
+			{
+				activeSessions.get(getActiveSessionID(plr.getPublicID())).setSheriffCount(Integer.parseInt(mgs[2]));
+				String str = String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getSheriffCount());
+				bot.execute(new SendMessage(upd.message().from().id(), "Количество шерифов изменено на " + str));
+			}
+			else
+				bot.execute(new SendMessage(upd.message().from().id(), String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getSheriffCount())));				
+		}
+		else 
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре чтобы использовать настройки !")); 
 	}
 	
-	private void NeutralCount (String[] mgs, Database db, TelegramBot bot, Update upd)
+	private void NeutralCount (String[] mgs, Database db, TelegramBot bot, Update upd) throws SQLException
 	{
+		Player plr = new Player();
+		plr = db.getUserTgID(upd.message().from().id());
 		
+		if(existPlayerSession(plr.getPublicID()))
+		{
+			if (mgs.length >= 3)	
+			{
+				activeSessions.get(getActiveSessionID(plr.getPublicID())).setNeutralCount(Integer.parseInt(mgs[2]));
+				String str = String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getNeutralCount());
+				bot.execute(new SendMessage(upd.message().from().id(), "Количество мирных жителей изменено на " + str));
+			}
+			else
+				bot.execute(new SendMessage(upd.message().from().id(), String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getNeutralCount())));				
+		}
+		else 
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре чтобы использовать настройки !")); 
 	}
 	
-	private void NightDuration (String[] mgs, Database db, TelegramBot bot, Update upd)
+	private void NightDuration (String[] mgs, Database db, TelegramBot bot, Update upd) throws SQLException
 	{
+		Player plr = new Player();
+		plr = db.getUserTgID(upd.message().from().id());
 		
+		if(existPlayerSession(plr.getPublicID()))
+		{
+			if (mgs.length >= 3)	
+			{
+				activeSessions.get(getActiveSessionID(plr.getPublicID())).setNightDuration(Integer.parseInt(mgs[2]));
+				String str = String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getNightDuration());
+				bot.execute(new SendMessage(upd.message().from().id(), "Продолжительность ночи изменено на " + str));
+			}
+			else
+				bot.execute(new SendMessage(upd.message().from().id(), String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getNightDuration())));				
+		}
+		else 
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре чтобы использовать настройки !")); 
 	}
 	
-	private void DayDuration (String[] mgs, Database db, TelegramBot bot, Update upd)
+	private void DayDuration (String[] mgs, Database db, TelegramBot bot, Update upd) throws SQLException
 	{
+		Player plr = new Player();
+		plr = db.getUserTgID(upd.message().from().id());
 		
+		if(existPlayerSession(plr.getPublicID()))
+		{
+			if (mgs.length >= 3)	
+			{
+				activeSessions.get(getActiveSessionID(plr.getPublicID())).setDayDuration(Integer.parseInt(mgs[2]));
+				String str = String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getDayDuration());
+				bot.execute(new SendMessage(upd.message().from().id(), "Продолжительность дня изменено на " + str));
+			}
+			else
+				bot.execute(new SendMessage(upd.message().from().id(), String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getDayDuration())));				
+		}
+		else 
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре чтобы использовать настройки !")); 
 	}
 	
-	private void DiscussionTime (String[] mgs, Database db, TelegramBot bot, Update upd)
+	private void DiscussionTime (String[] mgs, Database db, TelegramBot bot, Update upd) throws SQLException
 	{
+		Player plr = new Player();
+		plr = db.getUserTgID(upd.message().from().id());
 		
+		if(existPlayerSession(plr.getPublicID()))
+		{
+			if (mgs.length >= 3)	
+			{
+				activeSessions.get(getActiveSessionID(plr.getPublicID())).setDayDuration(Integer.parseInt(mgs[2]));
+				String str = String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getDayDuration());
+				bot.execute(new SendMessage(upd.message().from().id(), "Продолжительность дня изменено на " + str));
+			}
+			else
+				bot.execute(new SendMessage(upd.message().from().id(), String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getDayDuration())));				
+		}
+		else 
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре чтобы использовать настройки !")); 
 	}
 	
-	private void VotingTime (String[] mgs, Database db, TelegramBot bot, Update upd)
+	private void VotingTime (String[] mgs, Database db, TelegramBot bot, Update upd) throws SQLException
 	{
+		Player plr = new Player();
+		plr = db.getUserTgID(upd.message().from().id());
 		
+		if(existPlayerSession(plr.getPublicID()))
+		{
+			if (mgs.length >= 3)	
+			{
+				activeSessions.get(getActiveSessionID(plr.getPublicID())).setDiscussionTime(Integer.parseInt(mgs[2]));
+				String str = String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getDiscussionTime());
+				bot.execute(new SendMessage(upd.message().from().id(), "Время на обсуждения изменено на " + str));
+			}
+			else
+				bot.execute(new SendMessage(upd.message().from().id(), String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getDiscussionTime())));				
+		}
+		else 
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре чтобы использовать настройки !")); 
 	}
 	
-	private void ShowRolesDeath (String[] mgs, Database db, TelegramBot bot, Update upd)
+	private void ShowRolesDeath (String[] mgs, Database db, TelegramBot bot, Update upd) throws SQLException
 	{
+		Player plr = new Player();
+		plr = db.getUserTgID(upd.message().from().id());
 		
+		if(existPlayerSession(plr.getPublicID()))
+		{
+			if (mgs.length >= 3)	
+			{
+				activeSessions.get(getActiveSessionID(plr.getPublicID())).setShowRolesDeath(Boolean.parseBoolean(mgs[2]));
+				String str = String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getShowRolesDeath());
+				bot.execute(new SendMessage(upd.message().from().id(), "Показывание роли игрока после смерти изменено на " + str));
+			}
+			else
+				bot.execute(new SendMessage(upd.message().from().id(), String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getShowRolesDeath())));				
+		}
+		else 
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре чтобы использовать настройки !")); 
 	}
 	
-	private void LastWords (String[] mgs, Database db, TelegramBot bot, Update upd)
+	private void LastWords (String[] mgs, Database db, TelegramBot bot, Update upd) throws SQLException
 	{
+		Player plr = new Player();
+		plr = db.getUserTgID(upd.message().from().id());
 		
+		if(existPlayerSession(plr.getPublicID()))
+		{
+			if (mgs.length >= 3)	
+			{
+				activeSessions.get(getActiveSessionID(plr.getPublicID())).setLastWords(Boolean.parseBoolean(mgs[2]));
+				String str = String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getLastWords());
+				bot.execute(new SendMessage(upd.message().from().id(), "Показ последнего слова игрока изменено на " + str));
+			}
+			else
+				bot.execute(new SendMessage(upd.message().from().id(), String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getLastWords())));				
+		}
+		else 
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре чтобы использовать настройки !")); 
 	}
 	
-	private void AnonymoVoting (String[] mgs, Database db, TelegramBot bot, Update upd)
+	private void AnonymoVoting (String[] mgs, Database db, TelegramBot bot, Update upd) throws SQLException
 	{
+		Player plr = new Player();
+		plr = db.getUserTgID(upd.message().from().id());
 		
+		if(existPlayerSession(plr.getPublicID()))
+		{
+			if (mgs.length >= 3)	
+			{
+				activeSessions.get(getActiveSessionID(plr.getPublicID())).setAnonymoVoting(Boolean.parseBoolean(mgs[2]));
+				String str = String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getAnonymoVoting());
+				bot.execute(new SendMessage(upd.message().from().id(), "Анонимные голосования изменено на " + str));
+			}
+			else
+				bot.execute(new SendMessage(upd.message().from().id(), String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getAnonymoVoting())));				
+		}
+		else 
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре чтобы использовать настройки !")); 
 	}
 	
 	private boolean existPlayerSession(long plrID)
