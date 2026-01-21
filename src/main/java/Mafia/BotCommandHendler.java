@@ -14,6 +14,11 @@ import com.pengrad.telegrambot.request.SendMessage;
 @SuppressWarnings("deprecation")
 public class BotCommandHendler 
 {
+	public interface CommandInterface 
+	{
+		void execute(Database db, TelegramBot bot, Update upd) throws Exception;
+	}
+	
 	private Map<String, CommandInterface> commands = new HashMap<>();
 	private Map<String, Session> activeSessions = new HashMap<>();
 	
@@ -295,15 +300,12 @@ public class BotCommandHendler
 		bot.execute(new SendMessage(upd.message().from().id(), "EndGame !"));
 	}
 	
-	private void Settings (Database db, TelegramBot bot, Update upd)  throws SQLException
+	private void Settings (Database db, TelegramBot bot, Update upd)  throws Exception
 	{	
-		Player plr = new Player();
-		plr = db.getUserTgID(upd.message().from().id());
+		SettingsCommandHandler setComHand = new SettingsCommandHandler(activeSessions);
+    	String[] agrc = upd.message().text().split(" ");
 		
-		if(existPlayerSession(plr.getPublicID()))
-		{
-			bot.execute(new SendMessage(upd.message().from().id(), String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getPlayerCount())));
-		}
+		setComHand.execute(agrc, db, bot, upd);
 	}
 	
     public void execute (String command, Database db, TelegramBot bot, Update upd) throws Exception 

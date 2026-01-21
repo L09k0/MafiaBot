@@ -16,7 +16,7 @@ public class Control
 	
 	// Control
 	private Database db;
-	 private BotCommandHendler commandHandler = new BotCommandHendler();
+	private BotCommandHendler commandHandler = new BotCommandHendler();
 	
 	private String getBotToken() throws IOException
 	{
