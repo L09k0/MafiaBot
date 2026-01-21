@@ -308,8 +308,9 @@ public class BotCommandHendler
 		setComHand.execute(agrc, db, bot, upd);
 	}
 	
-    public void execute (String command, Database db, TelegramBot bot, Update upd) throws Exception 
+    public void execute (String[] mgs, Database db, TelegramBot bot, Update upd) throws Exception 
     {
+    	String command = mgs[0];
     	CommandInterface _command = commands.get(command);
         
     	if (_command != null) 

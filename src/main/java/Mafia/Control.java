@@ -48,23 +48,19 @@ public class Control
 		     		 
 		         	 if (update.message() != null && update.message().text() != null)
 		         	 {
-						System.out.println(update.message().from().firstName()+": "+update.message().text());
-						 
-						String messageText = update.message().text();
-						String[] agrc = messageText.split(" ");	
-						String command = agrc[0]; 
+		         		if(!db.userExists(update.message().from().id()))
+		         			db.AddUserdb(update.message().from().id(), update.message().from().firstName().toString());
+
+		         		System.out.println(update.message().from().firstName()+": "+update.message().text());
+						String[] agrc = update.message().text().split(" ");	
 						
-						commandHandler.execute(command, db,  bot, _updates);
-						
-						if(!db.userExists(update.message().from().id()))
-							db.AddUserdb(update.message().from().id(), update.message().from().firstName().toString());
-				
+						commandHandler.execute(agrc, db,  bot, _updates);
 		         	 }
 		         }
 		     } 
 		     catch (Exception e) 
 		     {
-		             e.printStackTrace();
+		    	 e.printStackTrace();
 		     }
 		     return UpdatesListener.CONFIRMED_UPDATES_ALL;
 		 });
