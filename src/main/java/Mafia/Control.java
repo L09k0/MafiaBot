@@ -3,17 +3,10 @@ package Mafia;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Consumer;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.model.request.ParseMode;
-import com.pengrad.telegrambot.request.SendMessage;
 
 public class Control 
 {
@@ -62,8 +55,6 @@ public class Control
 						String command = agrc[0]; 
 						
 						commandHandler.execute(command, db,  bot, _updates);
-						
-						long chatId = update.message().chat().id();
 						
 						if(!db.userExists(update.message().from().id()))
 							db.AddUserdb(update.message().from().id(), update.message().from().firstName().toString());

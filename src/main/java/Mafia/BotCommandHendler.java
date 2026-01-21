@@ -1,5 +1,6 @@
 package Mafia;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +11,7 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
 
+@SuppressWarnings("deprecation")
 public class BotCommandHendler 
 {
 	private Map<String, CommandInterface> commands = new HashMap<>();
@@ -69,10 +71,17 @@ public class BotCommandHendler
 		return null;
 	}
 	
-    private void Help (Database db, TelegramBot bot, Update upd) 
+    private void Help (Database db, TelegramBot bot, Update upd) throws IOException 
     {
-	   // HelperList hpl = new HelperList();
-	    String helpText = "dfgdfg"; // hpl.HelpList(agrc); 
+    	HelperList hpl = new HelperList();
+    	String[] agrc = upd.message().text().split(" ");	
+    	String helpText = null;
+    	
+    	if (agrc.length > 1)
+    		helpText = hpl.HelpList(agrc[1]); 
+    	else
+    		helpText = hpl.HelpList("help");
+    	
 	    bot.execute(new SendMessage(upd.message().from().id(), helpText).parseMode(ParseMode.Markdown));
     }
     
