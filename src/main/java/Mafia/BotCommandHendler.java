@@ -64,16 +64,24 @@ public class BotCommandHendler
 	    int sessionCount = 5; 
 	    int minPlayers = 1;   
 	    
-	    if (agrc.length > 1) 
+	    try
 	    {
-	        sessionCount = Integer.parseInt(agrc[1]);
+		    if (agrc.length > 1) 
+		    {
+		        sessionCount = Integer.parseInt(agrc[1]);
+		    }
+		    
+		    if (agrc.length > 2) 
+		    {
+		        minPlayers = Integer.parseInt(agrc[2]);
+		    }
 	    }
-	    
-	    if (agrc.length > 2) 
+	    catch (NumberFormatException e)
 	    {
-	        minPlayers = Integer.parseInt(agrc[2]);
+	    	System.out.println(e.getMessage());
+	    	bot.execute(new SendMessage(upd.message().from().id(), "Давай строки не будем пихать пока я не сделал нормальный обработчик ?)").parseMode(ParseMode.Markdown));
+	    	return;
 	    }
-
 		
 		for (int i = 0; i < sessionCount; ++i) 
 		{
