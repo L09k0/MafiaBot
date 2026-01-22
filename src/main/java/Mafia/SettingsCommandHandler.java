@@ -170,7 +170,7 @@ public class SettingsCommandHandler
 	    }
 	}
 	
-	private void NeutralCount (String[] mgs, Database db, TelegramBot bot, Update upd) throws SQLException
+	private void NeutralCount (String[] mgs, Database db, TelegramBot bot, Update upd)
 	{
 		try 
 		{	
@@ -203,8 +203,7 @@ public class SettingsCommandHandler
 	    }
 	}
 
-	
-	private void NightDuration (String[] mgs, Database db, TelegramBot bot, Update upd) throws SQLException
+	private void NightDuration (String[] mgs, Database db, TelegramBot bot, Update upd)
 	{
 		try 
 		{	
@@ -237,7 +236,7 @@ public class SettingsCommandHandler
 	    }
 	}
 	
-	private void DayDuration (String[] mgs, Database db, TelegramBot bot, Update upd) throws SQLException
+	private void DayDuration (String[] mgs, Database db, TelegramBot bot, Update upd)
 	{
 		try 
 		{	
@@ -270,7 +269,7 @@ public class SettingsCommandHandler
 	    }
 	}
 	
-	private void DiscussionTime (String[] mgs, Database db, TelegramBot bot, Update upd) throws SQLException
+	private void DiscussionTime (String[] mgs, Database db, TelegramBot bot, Update upd)
 	{
 		try
 		{
@@ -303,7 +302,7 @@ public class SettingsCommandHandler
 	    }
 	}
 	
-	private void VotingTime (String[] mgs, Database db, TelegramBot bot, Update upd) throws SQLException
+	private void VotingTime (String[] mgs, Database db, TelegramBot bot, Update upd)
 	{
 		try
 		{
@@ -336,7 +335,7 @@ public class SettingsCommandHandler
 	    }
 	}
 	
-	private void ShowRolesDeath (String[] mgs, Database db, TelegramBot bot, Update upd) throws SQLException
+	private void ShowRolesDeath (String[] mgs, Database db, TelegramBot bot, Update upd)
 	{
 		try
 		{
@@ -363,7 +362,7 @@ public class SettingsCommandHandler
 		}
 	}
 	
-	private void LastWords (String[] mgs, Database db, TelegramBot bot, Update upd) throws SQLException
+	private void LastWords (String[] mgs, Database db, TelegramBot bot, Update upd)
 	{
 		try
 		{
@@ -390,7 +389,7 @@ public class SettingsCommandHandler
 		}
 	}
 	
-	private void AnonymoVoting (String[] mgs, Database db, TelegramBot bot, Update upd) throws SQLException
+	private void AnonymoVoting (String[] mgs, Database db, TelegramBot bot, Update upd)
 	{
 		try
 		{
@@ -446,6 +445,43 @@ public class SettingsCommandHandler
 		return null;
 	}
 	
+	private void PrintAllSettings (String[] mgs, Database db, TelegramBot bot, Update upd)
+	{
+		try
+		{
+			Player plr = new Player();
+			plr = db.getUserTgID(upd.message().from().id());
+			String str = "*Список всех настроек игры:*\n"
+					   + "------------- Количество -------------\n"
+					   + "Игроков: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getPlayerCount()) + "\n"
+					   + "Мафий: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getMafiaCount()) + "\n"
+					   + "Докторов: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getDoctorCount()) + "\n"
+					   + "Шерифов: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getSheriffCount()) + "\n"
+					   + "Мирных: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getNeutralCount()) + "\n"
+					   + "\n------------- Время -------------\n"
+					   + "На ночь: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getNightDuration()) + "\n"
+					   + "На день: "  + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getDayDuration()) + "\n"
+					   + "На обсуждение: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getDiscussionTime()) + "\n"
+					   + "На голосование: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getVotingTime()) + "\n"
+					   + "\n------------- Другое -------------\n"
+					   + "Показ роми после смерти: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getShowRolesDeath()) + "\n"
+					   + "Последние слово: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getLastWords()) + "\n"
+					   + "Анонимные голосования: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getAnonymoVoting()) + "\n";
+			
+			bot.execute(new SendMessage(upd.message().from().id(), str).parseMode(ParseMode.Markdown));	
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e.getMessage());
+		}
+	    catch (NumberFormatException e)
+	    {
+	    	System.out.println(e.getMessage());
+	    	bot.execute(new SendMessage(upd.message().from().id(), "Давай строки не будем пихать пока я не сделал нормальный обработчик ?)").parseMode(ParseMode.Markdown));
+	    	return;
+	    }
+	}
+	
 	private void CommandRegister (String name, CommandInterface command)
 	{
 		commands.put(name, command);	
@@ -454,6 +490,10 @@ public class SettingsCommandHandler
     public void execute (String[] mgs, Database db, TelegramBot bot, Update upd, Map<String, Session> activeSessions) throws Exception 
     {
     	this.activeSessions = activeSessions;
+    	
+    	if(mgs.length < 2)
+    		PrintAllSettings(mgs, db, bot, upd);
+    	
     	String command = mgs[1];
     	CommandInterface _command = commands.get(command);
     	if (_command != null) 
