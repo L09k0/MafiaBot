@@ -50,7 +50,7 @@ public class Control
 		         	 {
 		         		if(!db.userExists(update.message().from().id()))
 		         			db.AddUserdb(update.message().from().id(), update.message().from().firstName().toString());
-
+	
 		         		System.out.println(update.message().from().firstName()+": "+update.message().text());
 						String[] agrc = update.message().text().split(" ");	
 						

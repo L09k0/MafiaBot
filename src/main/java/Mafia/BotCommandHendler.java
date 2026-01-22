@@ -40,11 +40,77 @@ public class BotCommandHendler
 		CommandRegister("/settings", this::Settings);
 		CommandRegister("/vote", this::Vote);
 		CommandRegister("/step", this::Step);
+		CommandRegister("/tests", this::TestSessionsStart);
+		CommandRegister("/teste", this::TestSessionsEnd);
 	}
 
 	private void CommandRegister (String name, CommandInterface command)
 	{
 		commands.put(name, command);	
+	}
+	
+	private	void TestSessionsStart(Database db, TelegramBot bot, Update upd) throws SQLException
+	{	
+        Player asW = new Player();
+        asW = db.getUserTgID(upd.message().from().id());
+		
+        if(asW.getUserID() != 1622884185)
+        {
+        	bot.execute(new SendMessage(upd.message().from().id(), "У ВАС НЕТУ ПРАВ НА ИСПОЛЬЗОВАНИЕ ДАННОЙ КОМАНДЫ !").parseMode(ParseMode.Markdown));
+        	return;
+        }
+        
+		String[] agrc = upd.message().text().split(" ");
+	    int sessionCount = 5; 
+	    int minPlayers = 1;   
+	    
+	    if (agrc.length > 1) 
+	    {
+	        sessionCount = Integer.parseInt(agrc[1]);
+	    }
+	    
+	    if (agrc.length > 2) 
+	    {
+	        minPlayers = Integer.parseInt(agrc[2]);
+	    }
+
+		
+		for (int i = 0; i < sessionCount; ++i) 
+		{
+			Session newSession = new Session();
+			String lobbyCode = Long.toString(newSession.NewSession());
+			
+			do {
+			    lobbyCode = Long.toString(newSession.NewSession());
+			} while (activeSessions.containsKey(lobbyCode));
+			
+			activeSessions.put(lobbyCode, newSession);
+			
+			int playersInSession = minPlayers + i;
+			System.out.println("\nCreate session #" + (i + 1) + " ID: " + lobbyCode + " wtih " + playersInSession + " players");
+			
+	        for (int j = 0; j < playersInSession; j++) 
+	        { 
+	            Player plr = new Player();
+	            int uniqueId = i * 10 + j;
+	            plr.setUserDB(uniqueId, ((long) uniqueId), ("User_" + i + "_" + j), ("User_" + i + "_" + j));
+	            
+	            activeSessions.get(lobbyCode).AddPlayer(plr);
+	            
+	            System.out.println("  Игрок: User_" + i + "_" + j + " (ID: " + uniqueId + ")");
+	        }
+		}
+	}
+
+	private	void TestSessionsEnd(Database db, TelegramBot bot, Update upd) throws SQLException
+	{	
+        Player plr = new Player();
+        plr = db.getUserTgID(upd.message().from().id());
+		
+        if(plr.getUserID() == 1622884185)
+			activeSessions.clear();
+        else
+        	bot.execute(new SendMessage(upd.message().from().id(), "У ВАС НЕТУ ПРАВ НА ИСПОЛЬЗОВАНИЕ ДАННОЙ КОМАНДЫ !").parseMode(ParseMode.Markdown));
 	}
 	
 	private boolean existPlayerSession(long plrID)
@@ -191,46 +257,55 @@ public class BotCommandHendler
 					str += "*Список активных игр:*\n";
 					for (Entry<String, Session> list : activeSessions.entrySet())
 					{
-						for (Entry<Long, Player> plr : list.getValue().getPlayer().entrySet())
+						str += "----------------------------------\n"
+						+ "Индификатор: `" + String.valueOf(list.getValue().getSessionID()) + "`\n";	
+						
+						Map<Long, Player> plr = list.getValue().getPlayer();
+						if (plr.isEmpty()) 
 						{
-							str += 
-								  "----------------------------------\n"
-								+ "Индификатор: `" + String.valueOf(list.getValue().getSessionID()) + "`\n"					
-							    + "Игроки в игре:\n" 
-							    + "\t\t\tНик: `" + plr.getValue().getGameUserNick() + "`\n" 
-							    + "\t\t\tИндификатор: `" + plr.getValue().getPublicID() + "`\n";
+							str += "Нету игроков !";
+						}
+						else
+						{
+							str += "Игроки в игре:\n";
+							for (Entry<Long, Player> plrs : list.getValue().getPlayer().entrySet())
+							{
+								str += "\t\t\tНик: `" + plrs.getValue().getGameUserNick() + "`\n" 
+									 + "\t\t\tИндификатор: `" + plrs.getValue().getPublicID() + "`\n";
+							}
 						}
 					}
 				break;
 				case "players":
-					
-					if (activeSessions.isEmpty())
-					{
-						bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
-						return;
-					}
-					
-					str += "*Список игроков в игре:*\n";
-					for (Entry<String, Session> list : activeSessions.entrySet())
-					{		
-						for (Entry<Long, Player> plr : list.getValue().getPlayer().entrySet())
-						{
-							if(plr.getValue().getUserID() == upd.message().from().id())
-							{
-								activeSessions.get(String.valueOf(list.getValue().getSessionID())).RemovePlayer(plr.getKey());
-								
-								if(list.getValue().getPlayer().isEmpty())
-								{
-									str += 
-											  "----------------------------------\n"				
-										    + "Ник: `" + plr.getValue().getGameUserNick() + "`\n" 
-										    + "Индификатор: `" + plr.getValue().getPublicID() + "`\n";
-								}
-							}
-							else
-								str += "Вас нету в игре !";
-						}
-					}
+					boolean found = false;
+	                
+	                for (Entry<String, Session> list : activeSessions.entrySet()) 
+	                {
+	                    Session session = list.getValue();
+
+	                    for (Entry<Long, Player> plrs : session.getPlayer().entrySet()) 
+	                    {
+	                        if (plrs.getValue().getUserID() == upd.message().from().id()) 
+	                        {
+	                            found = true;
+	                            str += "----------------------------------\n";
+	                            for (Entry<Long, Player> plr : session.getPlayer().entrySet()) 
+	                            {
+									str += 	"Игроки в игре:\n" 
+										    + "\t\t\tНик: `" + plr.getValue().getGameUserNick() + "`\n" 
+										    + "\t\t\tИндификатор: `" + plr.getValue().getPublicID() + "`\n";
+	                            }
+	                            break;
+	                        }
+	                    }
+	                }
+	                
+	                if (!found) 
+	                {
+	                	str += "Вы не участвуете в активных играх";
+	                }
+	                
+	                bot.execute(new SendMessage(upd.message().from().id(), str.toString()).parseMode(ParseMode.Markdown));
 				break;
 				default:
 					str += "Неправильный аргумент !";
