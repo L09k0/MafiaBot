@@ -42,11 +42,68 @@ public class BotCommandHendler
 		CommandRegister("/step", this::Step);
 		CommandRegister("/tests", this::TestSessionsStart);
 		CommandRegister("/teste", this::TestSessionsEnd);
+		CommandRegister("/lobby", this::ShowLobbyInfo);
 	}
 
 	private void CommandRegister (String name, CommandInterface command)
 	{
 		commands.put(name, command);	
+	}
+	
+	private	void ShowLobbyInfo(Database db, TelegramBot bot, Update upd) throws SQLException
+	{	
+		try
+		{
+			String str = "";
+			Player curreplr = new Player();
+			curreplr = db.getUserTgID(upd.message().from().id());
+			
+			str += "------------- Лобби -------------\n";
+	        for (Entry<String, Session> list : activeSessions.entrySet()) 
+	        {	
+	        	str += 	"Индификатор игры: `" + list.getValue().getSessionID() + "`\n";
+	        	
+	            for (Entry<Long, Player> plrs : list.getValue().getPlayer().entrySet()) 
+	            {
+	                if (plrs.getValue().getUserID() == upd.message().from().id()) 
+	                {
+	                    str += "----------------------------------\n";
+	                    for (Entry<Long, Player> plr : list.getValue().getPlayer().entrySet()) 
+	                    {
+							str += 	"*Игроки в игре:*\n" 
+								    + "\t\t\tНик: `" + plr.getValue().getGameUserNick() + "`\n" ;
+								//    + "\t\t\tИндификатор: `" + plr.getValue().getPublicID() + "`\n";
+	                    }
+	                    break;
+	                }
+	            }
+	        }
+	        
+			
+	        str += "\n*Список настроек игры:*\n"
+	        + "------------- Количество -------------\n"
+		    + "Игроков: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getPlayerCount()) + "\n"
+		    + "Мафий: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getMafiaCount()) + "\n"
+		    + "Докторов: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getDoctorCount()) + "\n"
+		    + "Шерифов: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getSheriffCount()) + "\n"
+		    + "Мирных: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getNeutralCount()) + "\n"
+		    + "\n------------- Время -------------\n"
+		    + "На ночь: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getNightDuration()) + "\n"
+		    + "На день: "  + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getDayDuration()) + "\n"
+		    + "На обсуждение: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getDiscussionTime()) + "\n"
+		    + "На голосование: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getVotingTime()) + "\n"
+		    + "\n------------- Другое -------------\n"
+		    + "Показ роми после смерти: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getShowRolesDeath()) + "\n"
+		    + "Последние слово: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getLastWords()) + "\n"
+		    + "Анонимные голосования: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getAnonymoVoting()) + "\n";
+	        bot.execute(new SendMessage(upd.message().from().id(), str).parseMode(ParseMode.Markdown));	
+		}
+		catch (NullPointerException e)
+		{
+			System.out.println(e.getMessage());
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));	
+			return;
+		}
 	}
 	
 	private	void TestSessionsStart(Database db, TelegramBot bot, Update upd) throws SQLException
@@ -121,7 +178,7 @@ public class BotCommandHendler
         	bot.execute(new SendMessage(upd.message().from().id(), "У ВАС НЕТУ ПРАВ НА ИСПОЛЬЗОВАНИЕ ДАННОЙ КОМАНДЫ !").parseMode(ParseMode.Markdown));
 	}
 	
-	private boolean existPlayerSession(long plrID)
+/*	private boolean existPlayerSession(long plrID)
 	{
 		if (activeSessions.isEmpty())
 			return false;
@@ -133,7 +190,7 @@ public class BotCommandHendler
 		}
 		
 		return false;
-	}
+	} */
 
 	private String getActiveSessionID(long plrID)
 	{

@@ -21,7 +21,7 @@ public class SettingsCommandHandler
 	private Map<String, CommandInterface> commands = new HashMap<>();
 	private Map<String, Session> activeSessions = new HashMap<>();
 	
-	public SettingsCommandHandler() 
+	public SettingsCommandHandler()
 	{
 		CommandRegister("playercount", this::PlayerCount);
 		CommandRegister("mafiacount", this::MafiaCount);
