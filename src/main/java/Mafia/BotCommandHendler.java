@@ -70,9 +70,17 @@ public class BotCommandHendler
 	                    str += "----------------------------------\n";
 	                    for (Entry<Long, Player> plr : list.getValue().getPlayer().entrySet()) 
 	                    {
-							str += 	"*Игроки в игре:*\n" 
-								    + "\t\t\tНик: `" + plr.getValue().getGameUserNick() + "`\n" ;
-								//    + "\t\t\tИндификатор: `" + plr.getValue().getPublicID() + "`\n";
+	                    	str += 	"*Игроки в игре:*\n" ;
+	                    	if (plr.getValue().getPublicID() == activeSessions.get(list.getKey()).getLeaderGame().getPublicID())
+	                    	{
+	                    		str += "\t\t\tНик: `" + plr.getValue().getGameUserNick() + "` (Ведущий)\n" ;
+	                    	}
+	                    	else
+	                    	{
+	                    		str += "\t\t\tНик: `" + plr.getValue().getGameUserNick() + "`\n" ;
+	                    	}
+	                    	
+	                    	//    + "\t\t\tИндификатор: `" + plr.getValue().getPublicID() + "`\n";
 	                    }
 	                    break;
 	                }
@@ -101,7 +109,6 @@ public class BotCommandHendler
 		catch (NullPointerException e)
 		{
 			System.out.println(e.getMessage());
-			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));	
 			return;
 		}
 	}
@@ -253,8 +260,10 @@ public class BotCommandHendler
 		
 		activeSessions.put(lobbyCode, newSession);
 		activeSessions.get(lobbyCode).AddPlayer(plr);
+		activeSessions.get(lobbyCode).setLeaderGame(plr);
 		
-		bot.execute(new SendMessage(upd.message().from().id(), "Creating new lobby `" + lobbyCode + "`").parseMode(ParseMode.Markdown));
+		bot.execute(new SendMessage(upd.message().from().id(), "*Лобби для игры создано !*\n"
+				+ "Индификатор: `" + lobbyCode + "`").parseMode(ParseMode.Markdown));
     }
     
     private void join (Database db, TelegramBot bot, Update upd) throws SQLException 

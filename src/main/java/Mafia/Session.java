@@ -17,6 +17,7 @@ public class Session
 	
 	// players
 	private Map<Long, Player> players = new HashMap<>();
+	Player leader = new  Player();
 	
 	public Session()
 	{
@@ -42,6 +43,16 @@ public class Session
 	public Map<Long, Player> getPlayer()
 	{
 		return this.players;
+	}
+	
+	public void setLeaderGame(Player leader)
+	{
+		this.leader = leader;
+	}
+	
+	public Player getLeaderGame()
+	{
+		return this.leader;
 	}
 	
 	public boolean AddPlayer(Player plr)
