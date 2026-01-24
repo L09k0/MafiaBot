@@ -19,6 +19,7 @@ public class SessionSettings
     private boolean showRolesDeath;
     private boolean lastWords; 
     private boolean anonymoVoting;
+    private boolean leaderChoosesRoles;
     
 	public SessionSettings() 
 	{
@@ -44,6 +45,7 @@ public class SessionSettings
 		this.showRolesDeath = false;
 		this.lastWords = true;
 		this.anonymoVoting = false;
+		this.leaderChoosesRoles = false;
 	}
 
 	public int getPlayerCount() 
@@ -106,6 +108,11 @@ public class SessionSettings
 		return this.anonymoVoting;
 	}
 	
+	public boolean getLeaderChoosesRoles() 
+	{
+		return this.leaderChoosesRoles;
+	}
+	
 	public void setPlayerCount(int playerCount) 
 	{
 		this.playerCount = playerCount;
@@ -164,5 +171,10 @@ public class SessionSettings
 	public void setAnonymoVoting(boolean anonymoVoting) 
 	{
 		this.anonymoVoting = anonymoVoting;
+	}
+	
+	public boolean setLeaderChoosesRoles(boolean leaderChoosesRoles) 
+	{
+		return this.leaderChoosesRoles = leaderChoosesRoles;
 	}
 }

@@ -23,20 +23,22 @@ public class SettingsCommandHandler
 	
 	public SettingsCommandHandler()
 	{
-		CommandRegister("playercount", this::PlayerCount);
-		CommandRegister("mafiacount", this::MafiaCount);
-		CommandRegister("doctorcount", this::DoctorCount);
-		CommandRegister("sheriffcount", this::SheriffCount);
-		CommandRegister("neutralcount", this::NeutralCount);
+		CommandRegister("playercount", 				this::PlayerCount);
+		CommandRegister("mafiacount", 				this::MafiaCount);
+		CommandRegister("doctorcount", 				this::DoctorCount);
+		CommandRegister("sheriffcount", 			this::SheriffCount);
+		CommandRegister("neutralcount", 			this::NeutralCount);
 		
-		CommandRegister("nightduration", this::NightDuration);
-		CommandRegister("dayduration", this::DayDuration);
-		CommandRegister("discussiontime", this::DiscussionTime);
-		CommandRegister("votingtime", this::VotingTime);
+		CommandRegister("nightduration", 			this::NightDuration);
+		CommandRegister("dayduration", 				this::DayDuration);
+		CommandRegister("discussiontime", 			this::DiscussionTime);
+		CommandRegister("votingtime", 				this::VotingTime);
 		
-		CommandRegister("showrolesDeath", this::ShowRolesDeath);
-		CommandRegister("lastwords", this::LastWords);
-		CommandRegister("anonymovoting", this::AnonymoVoting);
+		CommandRegister("showrolesDeath", 			this::ShowRolesDeath);
+		CommandRegister("lastwords", 				this::LastWords);
+		CommandRegister("anonymovoting", 			this::AnonymoVoting);
+		CommandRegister("leaderchoosesroles", 		this::LeaderChoosesRoles);
+		CommandRegister("lchr", 					this::LeaderChoosesRoles);
 	}
 	
 	private void PlayerCount (String[] mgs, Database db, TelegramBot bot, Update upd)
@@ -466,9 +468,42 @@ public class SettingsCommandHandler
 					   + "\n------------- Другое -------------\n"
 					   + "Показ роми после смерти: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getShowRolesDeath()) + "\n"
 					   + "Последние слово: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getLastWords()) + "\n"
-					   + "Анонимные голосования: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getAnonymoVoting()) + "\n";
+					   + "Анонимные голосования: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getAnonymoVoting()) + "\n"
+					   + "Ведущий выбирает роли: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getLeaderChoosesRoles()) + "\n";
 			
 			bot.execute(new SendMessage(upd.message().from().id(), str).parseMode(ParseMode.Markdown));	
+		}
+		catch (SQLException e)
+		{
+			System.out.println(e.getMessage());
+		}
+	    catch (NumberFormatException e)
+	    {
+	    	System.out.println(e.getMessage());
+	    	bot.execute(new SendMessage(upd.message().from().id(), "Давай строки не будем пихать пока я не сделал нормальный обработчик ?)").parseMode(ParseMode.Markdown));
+	    	return;
+	    }
+	}
+	
+	private void LeaderChoosesRoles (String[] mgs, Database db, TelegramBot bot, Update upd)
+	{		
+		try 
+		{
+			Player plr = new Player();
+			plr = db.getUserTgID(upd.message().from().id());
+			if(existPlayerSession(plr.getPublicID()))
+			{
+				if (mgs.length >= 3)	
+				{
+					activeSessions.get(getActiveSessionID(plr.getPublicID())).setLeaderChoosesRoles(Boolean.parseBoolean(mgs[2]));
+					String str = String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getLeaderChoosesRoles());
+					bot.execute(new SendMessage(upd.message().from().id(), "Ведущий выбирает роли изменено на " + str));
+				}
+				else
+					bot.execute(new SendMessage(upd.message().from().id(), String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getLeaderChoosesRoles())));				
+			}
+			else 
+				bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре чтобы использовать настройки !")); 
 		}
 		catch (SQLException e)
 		{

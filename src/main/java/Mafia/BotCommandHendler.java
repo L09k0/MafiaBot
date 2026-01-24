@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
@@ -103,7 +104,8 @@ public class BotCommandHendler
 		    + "\n------------- Другое -------------\n"
 		    + "Показ роми после смерти: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getShowRolesDeath()) + "\n"
 		    + "Последние слово: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getLastWords()) + "\n"
-		    + "Анонимные голосования: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getAnonymoVoting()) + "\n";
+		    + "Анонимные голосования: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getAnonymoVoting()) + "\n"
+		    + "Ведущий выбирает роли: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getLeaderChoosesRoles()) + "\n";
 	        bot.execute(new SendMessage(upd.message().from().id(), str).parseMode(ParseMode.Markdown));	
 		}
 		catch (NullPointerException e)
@@ -264,6 +266,7 @@ public class BotCommandHendler
 		} while (activeSessions.containsKey(lobbyCode));
 		
 		activeSessions.put(lobbyCode, newSession);
+		activeSessions.get(lobbyCode).setLobby();
 		activeSessions.get(lobbyCode).AddPlayer(plr);
 		activeSessions.get(lobbyCode).setLeaderGame(plr);
 		
@@ -450,8 +453,15 @@ public class BotCommandHendler
 	
 		Player plr = db.getUserTgID(upd.message().from().id());
 		String lobbyid = getActiveSessionID(plr.getPublicID());
+		
 		if(lobbyid == null)
 			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+
+		if (upd.message().from().id() != activeSessions.get(lobbyid).getLeaderGame().getUserID())
+		{
+			bot.execute(new SendMessage(upd.message().from().id(), "Вы не ведущий !").parseMode(ParseMode.Markdown));
+			return;
+		}
 		
 		activeSessions.get(lobbyid).Step();
 	}
@@ -466,15 +476,48 @@ public class BotCommandHendler
 	
 		Player plr = db.getUserTgID(upd.message().from().id());
 		String lobbyid = getActiveSessionID(plr.getPublicID());
+
 		if(lobbyid == null)
 			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+		
+		if (upd.message().from().id() != activeSessions.get(lobbyid).getLeaderGame().getUserID())
+		{
+			bot.execute(new SendMessage(upd.message().from().id(), "Вы не ведущий !").parseMode(ParseMode.Markdown));
+			return;
+		}
+		
 			
-		activeSessions.get(lobbyid).StartGame();		
+		try 
+		{
+			activeSessions.get(lobbyid).StartGame();		
+		}
+		catch (Exception e)
+		{
+			bot.execute(new SendMessage(upd.message().from().id(), e.getMessage()).parseMode(ParseMode.Markdown));
+		}
 	}
 
-	private void EndGame (Database db, TelegramBot bot, Update upd) 
+	private void EndGame (Database db, TelegramBot bot, Update upd) throws SQLException 
 	{
-		bot.execute(new SendMessage(upd.message().from().id(), "EndGame !"));
+		if (!existPlayerSession(upd.message().from().id()))
+		{
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+			return;
+		}  
+	
+		Player plr = db.getUserTgID(upd.message().from().id());
+		String lobbyid = getActiveSessionID(plr.getPublicID());
+
+		if(lobbyid == null)
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+		
+		if (upd.message().from().id() != activeSessions.get(lobbyid).getLeaderGame().getUserID())
+		{
+			bot.execute(new SendMessage(upd.message().from().id(), "Вы не ведущий !").parseMode(ParseMode.Markdown));
+			return;
+		}
+
+		activeSessions.get(lobbyid).EndGame();	
 	}
 	
 	private void Settings (Database db, TelegramBot bot, Update upd)  throws Exception

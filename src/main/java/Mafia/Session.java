@@ -21,12 +21,22 @@ public class Session
 	
 	public Session()
 	{
+		
+	}
+	
+	public void setLobby()
+	{
 		currentState = GameState.LOBBY;
 		System.out.println(currentState);
 	}
 	
-	public void StartGame()
+	public void StartGame() throws Exception
 	{
+		if (currentState != GameState.LOBBY)
+			throw new Exception("Вы не в лобби, чтобы начать игру !");
+		
+		
+		
 		currentState = GameState.NIGHT;
 		System.out.println(currentState);
 	}
@@ -36,6 +46,13 @@ public class Session
 		currentState = currentState.next();
 		System.out.println(currentState);
 	}
+	
+	public void EndGame()
+	{
+		currentState = currentState.next();
+		System.out.println(currentState);
+	}
+	
 	
 	public long generateCode()
 	{
@@ -142,6 +159,11 @@ public class Session
 		return this.settings.getAnonymoVoting();
 	}
 	
+	public boolean getLeaderChoosesRoles() 
+	{
+		return this.settings.getLeaderChoosesRoles();
+	}
+	
 	public void setPlayerCount(int playerCount)
 	{
 		this.settings.setPlayerCount(playerCount);
@@ -200,6 +222,11 @@ public class Session
 	public void setAnonymoVoting(boolean anonymoVoting)
 	{
 		this.settings.setAnonymoVoting(anonymoVoting);
+	}
+	
+	public boolean setLeaderChoosesRoles(boolean leaderChoosesRoles) 
+	{
+		return this.settings.setLeaderChoosesRoles(leaderChoosesRoles);
 	}
 }
 
