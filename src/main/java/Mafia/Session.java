@@ -16,6 +16,7 @@ public class Session
 	//private int currentDay;
 	
 	// players
+			// publicid
 	private Map<Long, Player> players = new HashMap<>();
 	Player leader = new  Player();
 	
@@ -38,7 +39,14 @@ public class Session
 		if (players.size() < 4)
 			throw new Exception("В лобби слишком мало участников, чтобы начать игру !");
 		
-		System.out.println(players.size());
+		if (settings.getLeaderChoosesRoles())
+		{
+			throw new Exception("Вы ну назначали игрокам роли !");
+		}
+		else
+			throw new Exception("Выбор роли не в ручную !");
+		
+	//	System.out.println(players.size());
 	}
 	
 	public void Step()
@@ -53,6 +61,11 @@ public class Session
 		System.out.println(currentState);
 	}
 	
+	public void setRole(long pPlrID, PlayerRole rp)
+	{
+		System.out.println("Userid: " + pPlrID + " set role \"" + rp.toString() + "\"\n");
+		players.get(pPlrID).setRole(rp);
+	}
 	
 	public long generateCode()
 	{

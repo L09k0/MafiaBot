@@ -34,7 +34,7 @@ public class BotCommandHendler
 		CommandRegister("/cure", this::Cure);
 		CommandRegister("/check", this::Check);
 		CommandRegister("/profile", this::Profile);
-		CommandRegister("/editProfile", this::EditProfile);
+		CommandRegister("/editprofile", this::EditProfile);
 		CommandRegister("/startgame", this::StartGame);
 		CommandRegister("/endgame", this::EndGame);
 		CommandRegister("/settings", this::Settings);
@@ -44,11 +44,88 @@ public class BotCommandHendler
 		CommandRegister("/teste", this::TestSessionsEnd);
 		CommandRegister("/addtestplayer", this::AddTestPlayers);
 		CommandRegister("/lobby", this::ShowLobbyInfo);
+		CommandRegister("/setrole", this::SetRole);
 	}
 
 	private void CommandRegister (String name, CommandInterface command)
 	{
 		commands.put(name, command);	
+	}
+	
+	private	void SetRole(Database db, TelegramBot bot, Update upd) throws SQLException
+	{
+		try
+		{
+			if (!existPlayerSession(upd.message().from().id()))
+			{
+				bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+				return;
+			}  
+		
+			Player plr = db.getUserTgID(upd.message().from().id());
+			String lobbyid = getActiveSessionID(plr.getPublicID());
+	
+			if(lobbyid == null)
+			{
+				bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+				return;
+			}
+			
+			if (upd.message().from().id() != activeSessions.get(lobbyid).getLeaderGame().getUserID())
+			{
+				bot.execute(new SendMessage(upd.message().from().id(), "Вы не ведущий !").parseMode(ParseMode.Markdown));
+				return;
+			}
+			
+			String[] agrc = upd.message().text().split(" ");
+			if (agrc.length > 1)
+			{
+				if (agrc.length > 2)
+				{
+					switch (agrc[1]) 
+					{
+					case "mafia":
+						activeSessions.get(lobbyid).setRole(Long.valueOf(agrc[2]), PlayerRole.MAFIA);
+					break;
+					case "doctor":
+						activeSessions.get(lobbyid).setRole(Long.valueOf(agrc[2]), PlayerRole.DOCTOR);
+					break;
+					case "sheriff":
+						activeSessions.get(lobbyid).setRole(Long.valueOf(agrc[2]), PlayerRole.SHERIFF);	
+					break;
+					case "neutral":
+						activeSessions.get(lobbyid).setRole(Long.valueOf(agrc[2]), PlayerRole.NEUTRAL);	
+					break;
+					default:
+						bot.execute(new SendMessage(upd.message().from().id(), "Нет такой роли !").parseMode(ParseMode.Markdown));
+					break;
+					}
+				}
+				else
+				{
+					bot.execute(new SendMessage(upd.message().from().id(), "Игрок не найден !").parseMode(ParseMode.Markdown));
+					return;
+				}
+			}
+			else
+			{
+				String str = "*Список всех ролей для выбора:*\n"
+						  +  "Мифия: `mafia`\n"
+						  +  "Доктор: `doctor`\n"
+						  +  "Шериф: `sheriff`\n"
+						  +  "Мирный житель: `neutral`\n";
+				
+				
+				bot.execute(new SendMessage(upd.message().from().id(), str).parseMode(ParseMode.Markdown));
+				return;
+			}
+		}
+		catch (NullPointerException e)
+		{
+			System.out.println(e.getMessage());
+			bot.execute(new SendMessage(upd.message().from().id(), "Давай строки не будем пихать пока я не сделал нормальный обработчик ?)").parseMode(ParseMode.Markdown));
+			return;
+		}
 	}
 	
 	private	void ShowLobbyInfo(Database db, TelegramBot bot, Update upd) throws SQLException
@@ -72,16 +149,19 @@ public class BotCommandHendler
 	                    	+  "*Игроки в игре:*\n";
 	                    for (Entry<Long, Player> plr : list.getValue().getPlayer().entrySet()) 
 	                    {
+	                    	str += "----------------------------------\n";
 	                    	if (plr.getValue().getPublicID() == activeSessions.get(list.getKey()).getLeaderGame().getPublicID())
 	                    	{
-	                    		str += "\t\t\tНик: `" + plr.getValue().getGameUserNick() + "` (Ведущий)\n" ;
+	                    		str += "\t\t\tНик: `" + plr.getValue().getGameUserNick() + "` (Ведущий)\n"
+	                    			 + "\t\t\tИндификатор: `" + plr.getValue().getPublicID() + "`\n"
+	                    		 	 + "\t\t\tРоль: `" + plr.getValue().getRole() + "`\n";
 	                    	}
 	                    	else
 	                    	{
-	                    		str += "\t\t\tНик: `" + plr.getValue().getGameUserNick() + "`\n" ;
+	                    		str += "\t\t\tНик: `" + plr.getValue().getGameUserNick() + "`\n"
+	                    			 + "\t\t\tИндификатор: `" + plr.getValue().getPublicID() + "`\n"
+	                    		     + "\t\t\tРоль: `" + plr.getValue().getRole() + "`\n";
 	                    	}
-	                    	
-	                    	//    + "\t\t\tИндификатор: `" + plr.getValue().getPublicID() + "`\n";
 	                    }
 	                    break;
 	                }
@@ -102,7 +182,7 @@ public class BotCommandHendler
 		    + "На обсуждение: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getDiscussionTime()) + "\n"
 		    + "На голосование: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getVotingTime()) + "\n"
 		    + "\n------------- Другое -------------\n"
-		    + "Показ роми после смерти: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getShowRolesDeath()) + "\n"
+		    + "Показ роли после смерти: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getShowRolesDeath()) + "\n"
 		    + "Последние слово: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getLastWords()) + "\n"
 		    + "Анонимные голосования: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getAnonymoVoting()) + "\n"
 		    + "Ведущий выбирает роли: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getLeaderChoosesRoles()) + "\n";
@@ -396,7 +476,8 @@ public class BotCommandHendler
 							for (Entry<Long, Player> plrs : list.getValue().getPlayer().entrySet())
 							{
 								str += "\t\t\tНик: `" + plrs.getValue().getGameUserNick() + "`\n" 
-									 + "\t\t\tИндификатор: `" + plrs.getValue().getPublicID() + "`\n";
+									 + "\t\t\tРоль: `" + plrs.getValue().getRole() + "`\n";
+								   //+ "\t\t\tИндификатор: `" + plrs.getValue().getPublicID() + "`\n";
 							}
 						}
 					}
@@ -416,19 +497,27 @@ public class BotCommandHendler
 	                    {
 	                        if (plrs.getValue().getUserID() == upd.message().from().id()) 
 	                        {
-	                            str += "----------------------------------\n";
-	                            for (Entry<Long, Player> plr : session.getPlayer().entrySet()) 
-	                            {
-									str += 	"Игроки в игре:\n" 
-										    + "\t\t\tНик: `" + plr.getValue().getGameUserNick() + "`\n" 
-										    + "\t\t\tИндификатор: `" + plr.getValue().getPublicID() + "`\n";
-	                            }
-	                            break;
+	                        		str +=   "*Игроки в игре:*\n";
+	         	                    for (Entry<Long, Player> plr : list.getValue().getPlayer().entrySet()) 
+	         	                    {
+	         	                    	str += "----------------------------------\n";
+	         	                    	if (plr.getValue().getPublicID() == activeSessions.get(list.getKey()).getLeaderGame().getPublicID())
+	         	                    	{
+	         	                    		str += "\t\t\tНик: `" + plr.getValue().getGameUserNick() + "` (Ведущий)\n"
+	         	                    			 + "\t\t\tИндификатор: `" + plr.getValue().getPublicID() + "`\n"
+	         	                    		 	 + "\t\t\tРоль: `" + plr.getValue().getRole() + "`\n";
+	         	                    	}
+	         	                    	else
+	         	                    	{
+	         	                    		str += "\t\t\tНик: `" + plr.getValue().getGameUserNick() + "`\n"
+	         	                    			 + "\t\t\tИндификатор: `" + plr.getValue().getPublicID() + "`\n"
+	         	                    		     + "\t\t\tРоль: `" + plrs.getValue().getRole() + "`\n";
+	         	                    	}
+	         	                    }
+	         	                    break;
 	                        }
 	                    }
 	                }
-	                
-	                bot.execute(new SendMessage(upd.message().from().id(), str.toString()).parseMode(ParseMode.Markdown));
 				break;
 				default:
 					str += "Неправильный аргумент !";
@@ -518,7 +607,10 @@ public class BotCommandHendler
 		String lobbyid = getActiveSessionID(plr.getPublicID());
 
 		if(lobbyid == null)
+		{
 			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+			return;
+		}
 		
 		if (upd.message().from().id() != activeSessions.get(lobbyid).getLeaderGame().getUserID())
 		{
@@ -549,7 +641,10 @@ public class BotCommandHendler
 		String lobbyid = getActiveSessionID(plr.getPublicID());
 
 		if(lobbyid == null)
+		{
 			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+			return;
+		}
 		
 		if (upd.message().from().id() != activeSessions.get(lobbyid).getLeaderGame().getUserID())
 		{
