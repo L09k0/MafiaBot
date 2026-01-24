@@ -35,10 +35,10 @@ public class Session
 		if (currentState != GameState.LOBBY)
 			throw new Exception("Вы не в лобби, чтобы начать игру !");
 		
+		if (players.size() < 4)
+			throw new Exception("В лобби слишком мало участников, чтобы начать игру !");
 		
-		
-		currentState = GameState.NIGHT;
-		System.out.println(currentState);
+		System.out.println(players.size());
 	}
 	
 	public void Step()
