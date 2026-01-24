@@ -491,14 +491,20 @@ public class SettingsCommandHandler
     {
     	this.activeSessions = activeSessions;
     	
-    	if(mgs.length < 2)
-    		PrintAllSettings(mgs, db, bot, upd);
-    	
-    	String command = mgs[1];
-    	CommandInterface _command = commands.get(command);
-    	if (_command != null) 
-            _command.execute(mgs, db, bot, upd);
+    	if(mgs.length > 1)
+    	{
+    		String command = mgs[1];
+    		CommandInterface _command = commands.get(command);
+    		if (_command != null) 
+    			_command.execute(mgs, db, bot, upd);
+    		else
+    			bot.execute(new SendMessage(upd.message().from().id(), "Нет такого команды !"));
+    	}
     	else
-    		bot.execute(new SendMessage(upd.message().from().id(), "Нет такого команды !"));
+    	{
+    		PrintAllSettings(mgs, db, bot, upd);    		
+    		return;
+    	}
+    	
     }
 }

@@ -35,8 +35,8 @@ public class BotCommandHendler
 		CommandRegister("/check", this::Check);
 		CommandRegister("/profile", this::Profile);
 		CommandRegister("/editProfile", this::EditProfile);
-		CommandRegister("/start", this::StartGame);
-		CommandRegister("/end", this::EndGame);
+		CommandRegister("/startgame", this::StartGame);
+		CommandRegister("/endgame", this::EndGame);
 		CommandRegister("/settings", this::Settings);
 		CommandRegister("/vote", this::Vote);
 		CommandRegister("/step", this::Step);
@@ -185,19 +185,24 @@ public class BotCommandHendler
         	bot.execute(new SendMessage(upd.message().from().id(), "У ВАС НЕТУ ПРАВ НА ИСПОЛЬЗОВАНИЕ ДАННОЙ КОМАНДЫ !").parseMode(ParseMode.Markdown));
 	}
 	
-/*	private boolean existPlayerSession(long plrID)
+	private boolean existPlayerSession(long tgplrID)
 	{
 		if (activeSessions.isEmpty())
 			return false;
 		
-		for (Entry<String, Session> list : activeSessions.entrySet())
-		{		
-			if(list.getValue().getPlayer().containsKey(plrID))
-				return true;
-		}
+	    for (Session list : activeSessions.values()) 
+	    {
+	        for (Player plr : list.getPlayer().values()) 
+	        {
+	            if (plr.getUserID() == tgplrID) 
+	            {
+	                return true;
+	            }
+	        }
+	    }
 		
 		return false;
-	} */
+	} 
 
 	private String getActiveSessionID(long plrID)
 	{
@@ -290,8 +295,11 @@ public class BotCommandHendler
     
     private void Leave (Database db, TelegramBot bot, Update upd) 
     {
-		if (activeSessions.isEmpty())
+		if (!existPlayerSession(upd.message().from().id()))
+		{
 			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+			return;
+		}
 		
 		for (Entry<String, Session> list : activeSessions.entrySet())
 		{		
@@ -351,8 +359,12 @@ public class BotCommandHendler
 					}
 				break;
 				case "players":
-					boolean found = false;
-	                
+					if (!existPlayerSession(upd.message().from().id()))
+					{
+						bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+						return;
+					}
+	              
 	                for (Entry<String, Session> list : activeSessions.entrySet()) 
 	                {
 	                    Session session = list.getValue();
@@ -361,7 +373,6 @@ public class BotCommandHendler
 	                    {
 	                        if (plrs.getValue().getUserID() == upd.message().from().id()) 
 	                        {
-	                            found = true;
 	                            str += "----------------------------------\n";
 	                            for (Entry<Long, Player> plr : session.getPlayer().entrySet()) 
 	                            {
@@ -372,11 +383,6 @@ public class BotCommandHendler
 	                            break;
 	                        }
 	                    }
-	                }
-	                
-	                if (!found) 
-	                {
-	                	str += "Вы не участвуете в активных играх";
 	                }
 	                
 	                bot.execute(new SendMessage(upd.message().from().id(), str.toString()).parseMode(ParseMode.Markdown));
@@ -441,7 +447,12 @@ public class BotCommandHendler
 	
 	private void StartGame (Database db, TelegramBot bot, Update upd) 
 	{
-		bot.execute(new SendMessage(upd.message().from().id(), "Start !"));
+		if (!existPlayerSession(upd.message().from().id()))
+		{
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+			return;
+		}
+		
 	}
 
 	private void EndGame (Database db, TelegramBot bot, Update upd) 
@@ -451,6 +462,12 @@ public class BotCommandHendler
 	
 	private void Settings (Database db, TelegramBot bot, Update upd)  throws Exception
 	{	
+		if (!existPlayerSession(upd.message().from().id()))
+		{
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+			return;
+		}
+		
 		SettingsCommandHandler setComHand = new SettingsCommandHandler();
     	String[] agrc = upd.message().text().split(" ");
 		
