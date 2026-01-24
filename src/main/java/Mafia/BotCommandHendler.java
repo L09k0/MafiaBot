@@ -42,6 +42,7 @@ public class BotCommandHendler
 		CommandRegister("/step", this::Step);
 		CommandRegister("/tests", this::TestSessionsStart);
 		CommandRegister("/teste", this::TestSessionsEnd);
+		CommandRegister("/addtestplayer", this::AddTestPlayers);
 		CommandRegister("/lobby", this::ShowLobbyInfo);
 	}
 
@@ -67,10 +68,10 @@ public class BotCommandHendler
 	            {
 	                if (plrs.getValue().getUserID() == upd.message().from().id()) 
 	                {
-	                    str += "----------------------------------\n";
+	                    str += "----------------------------------\n"
+	                    	+  "*Игроки в игре:*\n";
 	                    for (Entry<Long, Player> plr : list.getValue().getPlayer().entrySet()) 
 	                    {
-	                    	str += 	"*Игроки в игре:*\n" ;
 	                    	if (plr.getValue().getPublicID() == activeSessions.get(list.getKey()).getLeaderGame().getPublicID())
 	                    	{
 	                    		str += "\t\t\tНик: `" + plr.getValue().getGameUserNick() + "` (Ведущий)\n" ;
@@ -112,6 +113,46 @@ public class BotCommandHendler
 			System.out.println(e.getMessage());
 			return;
 		}
+	}
+
+	private	void AddTestPlayers(Database db, TelegramBot bot, Update upd) throws SQLException
+	{	
+        Player asW = new Player();
+        asW = db.getUserTgID(upd.message().from().id());
+		
+        if(asW.getUserID() != 1622884185)
+        {
+        	bot.execute(new SendMessage(upd.message().from().id(), "У ВАС НЕТУ ПРАВ НА ИСПОЛЬЗОВАНИЕ ДАННОЙ КОМАНДЫ !").parseMode(ParseMode.Markdown));
+        	return;
+        }
+        
+		String[] agrc = upd.message().text().split(" ");
+	    int plrCount = 5; 
+	    
+	    try
+	    {
+		    if (agrc.length > 1) 
+		    {
+		    	plrCount = Integer.parseInt(agrc[1]);
+		    }
+	    }
+	    catch (NumberFormatException e)
+	    {
+	    	System.out.println(e.getMessage());
+	    	bot.execute(new SendMessage(upd.message().from().id(), "Давай строки не будем пихать пока я не сделал нормальный обработчик ?)").parseMode(ParseMode.Markdown));
+	    	return;
+	    }
+
+        for (int i = 0; i < plrCount; i++) 
+        { 
+            Player plr = new Player();
+            int uniqueId = i * 10 + i;
+            plr.setUserDB(uniqueId, ((long) uniqueId), ("User_" + i), ("User_" + i));
+            
+            activeSessions.get(getActiveSessionID(asW.getPublicID())).AddPlayer(plr);
+            
+            System.out.println("Игрок: User_" + i + "_" + "(ID: " + uniqueId + ")");
+        }
 	}
 	
 	private	void TestSessionsStart(Database db, TelegramBot bot, Update upd) throws SQLException
