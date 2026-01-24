@@ -451,7 +451,7 @@ public class BotCommandHendler
 		{
 			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
 			return;
-		}
+		}  
 		
 	}
 
