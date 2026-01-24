@@ -8,5 +8,19 @@ public enum GameStep
 	DAY_DISCUSSION,
 	DAY_VOTING,
 	DAY_VOTING_ENG,
-	DAY_LAST_WORD
+	DAY_LAST_WORD;
+	
+    public GameStep next() 
+    {
+        GameStep[] steps = values();
+        int nextIndex = (this.ordinal() + 1) % steps.length;
+        return steps[nextIndex];
+    }
+    
+    public GameStep previous() 
+    {
+        GameStep[] steps = values();
+        int prevIndex = (this.ordinal() - 1 + steps.length) % steps.length;
+        return steps[prevIndex];
+    }
 }

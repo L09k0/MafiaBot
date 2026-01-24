@@ -204,14 +204,14 @@ public class BotCommandHendler
 		return false;
 	} 
 
-	private String getActiveSessionID(long plrID)
+	private String getActiveSessionID(long pPlrID)
 	{
 		if (activeSessions.isEmpty())
 			return null;
 		
 		for (Entry<String, Session> list : activeSessions.entrySet())
 		{	
-	        if (list.getValue().getPlayer().containsKey(plrID)) 
+	        if (list.getValue().getPlayer().containsKey(pPlrID)) 
 	        {
 	            return list.getKey();
 	        }
@@ -440,19 +440,36 @@ public class BotCommandHendler
 			bot.execute(new SendMessage(upd.message().from().id(), "Не удалось поменять ник !"));
 	}
 	
-	private void Step (Database db, TelegramBot bot, Update upd) 
-	{
-		bot.execute(new SendMessage(upd.message().from().id(), "Step !"));
-	}
-	
-	private void StartGame (Database db, TelegramBot bot, Update upd) 
+	private void Step (Database db, TelegramBot bot, Update upd) throws SQLException 
 	{
 		if (!existPlayerSession(upd.message().from().id()))
 		{
 			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
 			return;
 		}  
+	
+		Player plr = db.getUserTgID(upd.message().from().id());
+		String lobbyid = getActiveSessionID(plr.getPublicID());
+		if(lobbyid == null)
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
 		
+		activeSessions.get(lobbyid).Step();
+	}
+	
+	private void StartGame (Database db, TelegramBot bot, Update upd) throws SQLException 
+	{
+		if (!existPlayerSession(upd.message().from().id()))
+		{
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+			return;
+		}  
+	
+		Player plr = db.getUserTgID(upd.message().from().id());
+		String lobbyid = getActiveSessionID(plr.getPublicID());
+		if(lobbyid == null)
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+			
+		activeSessions.get(lobbyid).StartGame();		
 	}
 
 	private void EndGame (Database db, TelegramBot bot, Update upd) 

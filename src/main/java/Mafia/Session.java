@@ -11,7 +11,7 @@ public class Session
 	private SessionSettings settings = new SessionSettings();
 	
 	// State
-	//private GameState currentState;
+	private GameState currentState;
 	//private GameStep currentStep;
 	//private int currentDay;
 	
@@ -21,7 +21,20 @@ public class Session
 	
 	public Session()
 	{
-		// TODO Auto-generated constructor 
+		currentState = GameState.LOBBY;
+		System.out.println(currentState);
+	}
+	
+	public void StartGame()
+	{
+		currentState = GameState.NIGHT;
+		System.out.println(currentState);
+	}
+	
+	public void Step()
+	{
+		currentState = currentState.next();
+		System.out.println(currentState);
 	}
 	
 	public long generateCode()
