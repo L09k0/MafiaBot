@@ -422,7 +422,13 @@ public class BotCommandHendler
 				plr = db.getUserTgID(upd.message().from().id());
 				
 				if (activeSessions.get(lobbyCode[1]).AddPlayer(plr))
-					bot.execute(new SendMessage(chatId, "Ты присоединился в лобби !"));
+				{
+					for (Entry<Long, Player> plrs : activeSessions.get(lobbyCode[1]).getPlayer().entrySet())
+			        {
+						System.out.println(plrs.getValue().getGameUserNick() + " присоединился в лобби \n");
+			        	bot.execute(new SendMessage(plrs.getValue().getUserID(), "`" + plr.getGameUserNick() + "` присоединился в лобби !").parseMode(ParseMode.Markdown));				        	
+			        }
+				}
 				else 
 					bot.execute(new SendMessage(chatId, "Не удалось присоединился в лобби !"));
 		    } 
@@ -455,10 +461,17 @@ public class BotCommandHendler
 				{
 					activeSessions.get(String.valueOf(list.getValue().getSessionID())).RemovePlayer(plr.getKey());
 					
+					for (Entry<Long, Player> plrs : activeSessions.get(list.getKey()).getPlayer().entrySet())
+					{
+						System.out.println(plr.getValue().getGameUserNick() + " вышел из игры !\n");
+						bot.execute(new SendMessage(plrs.getValue().getUserID(), "`" + plr.getValue().getGameUserNick() + "` вышел из игры !").parseMode(ParseMode.Markdown));				        	
+					}
+					
 					if(list.getValue().getPlayer().isEmpty())
 					{
 						activeSessions.remove(String.valueOf(list.getValue().getSessionID()));
-						bot.execute(new SendMessage(upd.message().from().id(), "Вы вышли из игры !").parseMode(ParseMode.Markdown));
+												
+						System.out.println("Сессий больше нету !\n");
 						return;
 					}
 				}
