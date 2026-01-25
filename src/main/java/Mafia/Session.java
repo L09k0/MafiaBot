@@ -1,6 +1,9 @@
 package Mafia;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ThreadLocalRandom;
@@ -49,12 +52,102 @@ public class Session
 					throw new Exception("Не у всех участников назначены роли, чтобы начать игру !");
 				}
 			}
+			
 			this.currentState = GameState.NIGHT;
 		}
 		else
-			throw new Exception("Выбор роли не в ручную !");
+		{
+			assignRandomRoles();
+		}
 		
 	//	System.out.println(players.size());
+	}
+	
+	private void assignRandomRoles() 
+	{
+	    int playerCount = players.size();
+	    
+	    int mafiaCount = Math.min(settings.getMafiaCount(), playerCount);
+	    int remaining = playerCount - mafiaCount;
+	    
+	    int doctorCount = Math.min(settings.getDoctorCount(), remaining);
+	    remaining -= doctorCount;
+	    
+	    int sheriffCount = Math.min(settings.getSheriffCount(), remaining);
+	    remaining -= sheriffCount;
+	    
+	    int neutralCount = Math.min(settings.getNeutralCount(), remaining);
+	    
+	    // Если после этого остались игроки без ролей, добавляем мирных эитей
+	    int unassigned = playerCount - (mafiaCount + doctorCount + sheriffCount + neutralCount);
+	    neutralCount += unassigned;
+	    if (neutralCount < 0) 
+	    {
+	        mafiaCount = Math.max(1, mafiaCount + neutralCount);
+	        neutralCount = 0;
+	    }
+
+	    List<PlayerRole> rolePool = new ArrayList<>();
+	    for (int i = 0; i < mafiaCount; i++) 
+	    {
+	        rolePool.add(PlayerRole.MAFIA);
+	    }
+	    
+	    for (int i = 0; i < doctorCount; i++) 
+	    {
+	        rolePool.add(PlayerRole.DOCTOR);
+	    }
+	    
+	    for (int i = 0; i < sheriffCount; i++) 
+	    {
+	        rolePool.add(PlayerRole.SHERIFF);
+	    }
+	    
+	    for (int i = 0; i < neutralCount; i++) 
+	    {
+	        rolePool.add(PlayerRole.NEUTRAL);
+	    }
+	    
+	    Collections.shuffle(rolePool);
+	    List<Long> playerIds = new ArrayList<>(players.keySet());
+	    Collections.shuffle(playerIds);
+	    
+	    for (int i = 0; i < playerIds.size(); i++) 
+	    {
+	        Long playerId = playerIds.get(i);
+	        Player player = players.get(playerId);
+	        
+	        if (i < rolePool.size()) 
+	        {
+	            player.setRole(rolePool.get(i));
+	        } 
+	        else 
+	        {
+	            player.setRole(PlayerRole.NEUTRAL);
+	        }
+	    }
+	    
+	    logRoleDistribution();
+	}
+
+	private void logRoleDistribution() 
+	{
+	    Map<PlayerRole, Integer> count = new HashMap<>();
+	    
+	    for (Player player : players.values()) 
+	    {
+	        PlayerRole role = player.getRole();
+	        count.put(role, count.getOrDefault(role, 0) + 1);
+	    }
+	    
+	    System.out.println("=== Распределение ролей ===");
+	    for (PlayerRole role : PlayerRole.values()) 
+	    {
+	        int roleCount = count.getOrDefault(role, 0);
+	        if (roleCount > 0) {
+	            System.out.println(role + ": " + roleCount + " игроков");
+	        }
+	    }
 	}
 	
 	public void Step()

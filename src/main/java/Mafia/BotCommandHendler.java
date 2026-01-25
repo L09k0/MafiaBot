@@ -148,7 +148,13 @@ public class BotCommandHendler
 	                if (plrs.getValue().getUserID() == upd.message().from().id()) 
 	                {
 	                    str += "----------------------------------\n"
-	                    	+  "*Игроки в игре:*\n";
+	                         + "*Игроки в игре:*\n";
+	                    
+	                    if (activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getPlayer().size() < 4)     
+	                    	str +=  "\t\t\tВсего в игре: " + activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getPlayer().size() + " *(Не хватает игроков !)*\n";	                    	
+	                    else
+	                    	str +=  "\t\t\tВсего в игре: " + activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getPlayer().size() + "\n";
+	                    
 	                    for (Entry<Long, Player> plr : list.getValue().getPlayer().entrySet()) 
 	                    {
 	                    	str += "----------------------------------\n";
@@ -487,7 +493,6 @@ public class BotCommandHendler
 
         if (targetSession.getLeaderGame() != null && targetSession.getLeaderGame().getUserID() == upd.message().from().id()) 
         {
-            
             java.util.List<Player> otherPlayers = targetSession.getPlayer().values().stream().filter(p -> p.getUserID() != upd.message().from().id()).collect(Collectors.toList());
             
             if (!otherPlayers.isEmpty()) 
@@ -699,7 +704,6 @@ public class BotCommandHendler
 			return;
 		}
 		
-			
 		try 
 		{
 			activeSessions.get(lobbyid).StartGame();		

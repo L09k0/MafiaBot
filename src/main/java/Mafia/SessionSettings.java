@@ -29,17 +29,17 @@ public class SessionSettings
 	public void SetDefault()
 	{
 		// players
-		this.playerCount = 10;
-		this.mafiaCount = 2;
-		this.doctorCount = 1;
-		this.sheriffCount = 1;
-		this.neutralCount = 6;
+		this.playerCount = 4;
+		this.mafiaCount = 0;
+		this.doctorCount = 0;
+		this.sheriffCount = 0;
+		this.neutralCount = 0;
 		
 		// time (*second)
-		this.nightDuration = 30;
-		this.dayDuration = 180;
-		this.discussionTime = 120;
-		this.votingTime = 60;
+		this.nightDuration = 0;
+		this.dayDuration = 0;
+		this.discussionTime = 0;
+		this.votingTime = 0;
 		
 		// other
 		this.showRolesDeath = false;
