@@ -2,6 +2,7 @@ package Mafia;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Session 
@@ -41,7 +42,14 @@ public class Session
 		
 		if (settings.getLeaderChoosesRoles())
 		{
-			throw new Exception("Вы ну назначали игрокам роли !");
+			for (Entry<Long, Player> plrs : players.entrySet()) 
+			{
+				if (plrs.getValue().getRole() == PlayerRole.DEFAULT)
+				{
+					throw new Exception("Не у всех участников назначены роли, чтобы начать игру !");
+				}
+			}
+			this.currentState = GameState.NIGHT;
 		}
 		else
 			throw new Exception("Выбор роли не в ручную !");
