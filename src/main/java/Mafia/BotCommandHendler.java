@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
@@ -447,36 +449,71 @@ public class BotCommandHendler
     
     private void Leave (Database db, TelegramBot bot, Update upd) 
     {
-		if (!existPlayerSession(upd.message().from().id()))
-		{
-			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
-			return;
-		}
-		
-		for (Entry<String, Session> list : activeSessions.entrySet())
-		{		
-			for (Entry<Long, Player> plr : list.getValue().getPlayer().entrySet())
-			{
-				if(plr.getValue().getUserID() == upd.message().from().id())
-				{
-					activeSessions.get(String.valueOf(list.getValue().getSessionID())).RemovePlayer(plr.getKey());
-					
-					for (Entry<Long, Player> plrs : activeSessions.get(list.getKey()).getPlayer().entrySet())
-					{
-						System.out.println(plr.getValue().getGameUserNick() + " вышел из игры !\n");
-						bot.execute(new SendMessage(plrs.getValue().getUserID(), "`" + plr.getValue().getGameUserNick() + "` вышел из игры !").parseMode(ParseMode.Markdown));				        	
-					}
-					
-					if(list.getValue().getPlayer().isEmpty())
-					{
-						activeSessions.remove(String.valueOf(list.getValue().getSessionID()));
-												
-						System.out.println("Сессий больше нету !\n");
-						return;
-					}
-				}
-			}
-		}
+    	if (!existPlayerSession(upd.message().from().id())) 
+    	{
+            bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !"));
+            return;
+        }
+        
+        String sessionKey = null;
+        Long playerKey = null;
+        String playerName = null;
+        Session targetSession = null;
+        
+        for (Entry<String, Session> list : activeSessions.entrySet()) 
+        {
+            for (Entry<Long, Player> plr : list.getValue().getPlayer().entrySet()) 
+            {
+                if (plr.getValue().getUserID() == upd.message().from().id()) 
+                {
+                    sessionKey = list.getKey();
+                    playerKey = plr.getKey();
+                    playerName = plr.getValue().getGameUserNick();
+                    targetSession = list.getValue();
+                    break;
+                }
+            }
+            
+            if (sessionKey != null) 
+            	break;
+        }
+        
+        if (targetSession == null) 
+        {
+            bot.execute(new SendMessage(upd.message().from().id(), "Ошибка targetSession = null ! "));
+            return;
+        }
+        
+
+        if (targetSession.getLeaderGame() != null && targetSession.getLeaderGame().getUserID() == upd.message().from().id()) 
+        {
+            
+            java.util.List<Player> otherPlayers = targetSession.getPlayer().values().stream().filter(p -> p.getUserID() != upd.message().from().id()).collect(Collectors.toList());
+            
+            if (!otherPlayers.isEmpty()) 
+            {
+                Player newLeader = otherPlayers.get(ThreadLocalRandom.current().nextInt(otherPlayers.size()));
+                targetSession.setLeaderGame(newLeader);
+                bot.execute(new SendMessage(newLeader.getUserID(), "Вы теперь ведущий игры !"));
+            }
+        }
+        
+        targetSession.RemovePlayer(playerKey);
+        
+        for (Player remainingPlayer : targetSession.getPlayer().values()) 
+        {
+            bot.execute(new SendMessage(remainingPlayer.getUserID(), "`" + playerName + "` вышел из игры !").parseMode(ParseMode.Markdown));
+        }
+        
+        if (targetSession.getPlayer().isEmpty()) 
+        {
+            activeSessions.remove(sessionKey);
+            bot.execute(new SendMessage(upd.message().from().id(), "Сессия удалена (не осталось игроков) !"));
+        }
+        else 
+        {
+            bot.execute(new SendMessage(upd.message().from().id(), "Вы вышли из игры !"));
+        }
     }
     
     private void List (Database db, TelegramBot bot, Update upd) 
