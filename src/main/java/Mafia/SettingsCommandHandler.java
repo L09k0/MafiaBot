@@ -53,7 +53,7 @@ public class SettingsCommandHandler
 				{
 					activeSessions.get(getActiveSessionID(plr.getPublicID())).setPlayerCount(Integer.parseInt(mgs[2]));
 					String str = String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getPlayerCount());
-					bot.execute(new SendMessage(upd.message().from().id(), "Количество игроков изменено на " + str));
+					bot.execute(new SendMessage(upd.message().from().id(), "Макс. кол-во игроков изменено на " + str));
 				}
 				else
 					bot.execute(new SendMessage(upd.message().from().id(), String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getPlayerCount())));				
@@ -455,7 +455,7 @@ public class SettingsCommandHandler
 			plr = db.getUserTgID(upd.message().from().id());
 			String str = "*Список всех настроек игры:*\n"
 					   + "------------- Количество -------------\n"
-					   + "Игроков: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getPlayerCount()) + "\n"
+					   + "Макс. кол-во игроков: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getPlayerCount()) + "\n"
 					   + "Мафий: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getMafiaCount()) + "\n"
 					   + "Докторов: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getDoctorCount()) + "\n"
 					   + "Шерифов: " + String.valueOf(activeSessions.get(getActiveSessionID(plr.getPublicID())).getSheriffCount()) + "\n"

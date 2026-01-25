@@ -187,7 +187,7 @@ public class BotCommandHendler
 			
 	        str += "\n*Список настроек игры:*\n"
 	        + "------------- Количество -------------\n"
-		    + "Игроков: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getPlayerCount()) + "\n"
+		    + "Макс. игроков: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getPlayerCount()) + "\n"
 		    + "Мафий: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getMafiaCount()) + "\n"
 		    + "Докторов: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getDoctorCount()) + "\n"
 		    + "Шерифов: " + String.valueOf(activeSessions.get(getActiveSessionID(curreplr.getPublicID())).getSheriffCount()) + "\n"
