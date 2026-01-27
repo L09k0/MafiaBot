@@ -62,69 +62,75 @@ public class Session
 		
 	//	System.out.println(players.size());
 	}
-	
-	private void assignRandomRoles() 
+/*	для теста
+	public void setFindСoefficient() throws Exception
 	{
-	    int playerCount = players.size();
+		int P = players.size();
+		if (P < 0)
+		{
+			System.out.println("Игроков не найдено !\n"); 
+			return;
+		}
+		
+	    int M = P <= 6 ? 1 : P <= 12 ? 2 : P <= 17 ? 3 : 4;
+	    int D = P < 5 ? 0 : P < 15 ? 1 : 2;
+	    int S = P < 6 ? 0 : P < 15 ? 1 : 2;
 	    
-	    int mafiaCount = Math.min(settings.getMafiaCount(), playerCount);
-	    int remaining = playerCount - mafiaCount;
+	    List<PlayerRole> roles = new ArrayList<>();
+	    for (int i = 0; i < M; i++) 
+	    	roles.add(PlayerRole.MAFIA);
 	    
-	    int doctorCount = Math.min(settings.getDoctorCount(), remaining);
-	    remaining -= doctorCount;
+	    for (int i = 0; i < D; i++) 
+	    	roles.add(PlayerRole.DOCTOR);
 	    
-	    int sheriffCount = Math.min(settings.getSheriffCount(), remaining);
-	    remaining -= sheriffCount;
+	    for (int i = 0; i < S; i++) 
+	    	roles.add(PlayerRole.SHERIFF);
 	    
-	    int neutralCount = Math.min(settings.getNeutralCount(), remaining);
+	    for (int i = 0; i < (P - M - D - S); i++) 
+	    	roles.add(PlayerRole.NEUTRAL);
 	    
-	    // Если после этого остались игроки без ролей, добавляем мирных эитей
-	    int unassigned = playerCount - (mafiaCount + doctorCount + sheriffCount + neutralCount);
-	    neutralCount += unassigned;
-	    if (neutralCount < 0) 
+	    Collections.shuffle(roles);
+	    
+	    int idx = 0;
+	    for (Player p : players.values()) 
 	    {
-	        mafiaCount = Math.max(1, mafiaCount + neutralCount);
-	        neutralCount = 0;
+	        p.setRole(roles.get(idx++));
 	    }
-
-	    List<PlayerRole> rolePool = new ArrayList<>();
-	    for (int i = 0; i < mafiaCount; i++) 
-	    {
-	        rolePool.add(PlayerRole.MAFIA);
-	    }
+		
+	}
+	 */
+	public void assignRandomRoles() 
+	{
+		int P = players.size();
+		if (P < 0)
+		{
+			System.out.println("Игроков не найдено !\n");
+			return;
+		}
+		
+	    int M = P <= 6 ? 1 : P <= 12 ? 2 : P <= 17 ? 3 : 4;
+	    int D = P < 5 ? 0 : P < 15 ? 1 : 2;
+	    int S = P < 6 ? 0 : P < 15 ? 1 : 2;
 	    
-	    for (int i = 0; i < doctorCount; i++) 
-	    {
-	        rolePool.add(PlayerRole.DOCTOR);
-	    }
+	    List<PlayerRole> roles = new ArrayList<>();
+	    for (int i = 0; i < M; i++) 
+	    	roles.add(PlayerRole.MAFIA);
 	    
-	    for (int i = 0; i < sheriffCount; i++) 
-	    {
-	        rolePool.add(PlayerRole.SHERIFF);
-	    }
+	    for (int i = 0; i < D; i++) 
+	    	roles.add(PlayerRole.DOCTOR);
 	    
-	    for (int i = 0; i < neutralCount; i++) 
-	    {
-	        rolePool.add(PlayerRole.NEUTRAL);
-	    }
+	    for (int i = 0; i < S; i++) 
+	    	roles.add(PlayerRole.SHERIFF);
 	    
-	    Collections.shuffle(rolePool);
-	    List<Long> playerIds = new ArrayList<>(players.keySet());
-	    Collections.shuffle(playerIds);
+	    for (int i = 0; i < (P - M - D - S); i++) 
+	    	roles.add(PlayerRole.NEUTRAL);
 	    
-	    for (int i = 0; i < playerIds.size(); i++) 
+	    Collections.shuffle(roles);
+	    
+	    int idx = 0;
+	    for (Player p : players.values()) 
 	    {
-	        Long playerId = playerIds.get(i);
-	        Player player = players.get(playerId);
-	        
-	        if (i < rolePool.size()) 
-	        {
-	            player.setRole(rolePool.get(i));
-	        } 
-	        else 
-	        {
-	            player.setRole(PlayerRole.NEUTRAL);
-	        }
+	        p.setRole(roles.get(idx++));
 	    }
 	    
 	    logRoleDistribution();
@@ -144,7 +150,8 @@ public class Session
 	    for (PlayerRole role : PlayerRole.values()) 
 	    {
 	        int roleCount = count.getOrDefault(role, 0);
-	        if (roleCount > 0) {
+	        if (roleCount > 0) 
+	        {
 	            System.out.println(role + ": " + roleCount + " игроков");
 	        }
 	    }
@@ -199,7 +206,7 @@ public class Session
 		return this.leader;
 	}
 	
-	public boolean AddPlayer(Player plr)
+	public boolean AddPlayer(Player plr) throws Exception
 	{
 		players.put(plr.getPublicID(), plr);
 		

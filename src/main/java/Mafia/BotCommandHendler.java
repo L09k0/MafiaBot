@@ -29,6 +29,7 @@ public class BotCommandHendler
 		CommandRegister("/help", this::Help);
 		CommandRegister("/start", this::Start);
 		CommandRegister("/create", this::Create);
+		CommandRegister("/close", this::Close);
 		CommandRegister("/join", this::join);
 		CommandRegister("/leave", this::Leave);
 		CommandRegister("/list", this::List);
@@ -47,11 +48,66 @@ public class BotCommandHendler
 		CommandRegister("/addtestplayer", this::AddTestPlayers);
 		CommandRegister("/lobby", this::ShowLobbyInfo);
 		CommandRegister("/setrole", this::SetRole);
+		CommandRegister("/setrandomrole", this::SetRandomRole);
 	}
 
 	private void CommandRegister (String name, CommandInterface command)
 	{
 		commands.put(name, command);	
+	}
+	
+	private	void Close(Database db, TelegramBot bot, Update upd) throws SQLException
+	{
+		if (!existPlayerSession(upd.message().from().id()))
+		{
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+			return;
+		}  
+	
+		Player plr = db.getUserTgID(upd.message().from().id());
+		String lobbyid = getActiveSessionID(plr.getPublicID());
+
+		if(lobbyid == null)
+		{
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+			return;
+		}
+		
+		if (upd.message().from().id() != activeSessions.get(lobbyid).getLeaderGame().getUserID())
+		{
+			bot.execute(new SendMessage(upd.message().from().id(), "Вы не ведущий !").parseMode(ParseMode.Markdown));
+			return;
+		}
+		
+		bot.execute(new SendMessage(upd.message().from().id(), "Лобби закрыто тест !").parseMode(ParseMode.Markdown));
+	}
+	
+	private	void SetRandomRole(Database db, TelegramBot bot, Update upd) throws SQLException
+	{
+		if (!existPlayerSession(upd.message().from().id()))
+		{
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+			return;
+		}  
+	
+		Player plr = db.getUserTgID(upd.message().from().id());
+		String lobbyid = getActiveSessionID(plr.getPublicID());
+
+		if(lobbyid == null)
+		{
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+			return;
+		}
+		
+		if (upd.message().from().id() != activeSessions.get(lobbyid).getLeaderGame().getUserID())
+		{
+			bot.execute(new SendMessage(upd.message().from().id(), "Вы не ведущий !").parseMode(ParseMode.Markdown));
+			return;
+		}
+		
+		activeSessions.get(lobbyid).assignRandomRoles();
+		
+		bot.execute(new SendMessage(upd.message().from().id(), "Рандомные роли рассчитаны !").parseMode(ParseMode.Markdown));
 	}
 	
 	private	void SetRole(Database db, TelegramBot bot, Update upd) throws SQLException
@@ -211,7 +267,7 @@ public class BotCommandHendler
 		}
 	}
 
-	private	void AddTestPlayers(Database db, TelegramBot bot, Update upd) throws SQLException
+	private	void AddTestPlayers(Database db, TelegramBot bot, Update upd) throws Exception
 	{	
         Player asW = new Player();
         asW = db.getUserTgID(upd.message().from().id());
@@ -251,7 +307,7 @@ public class BotCommandHendler
         }
 	}
 	
-	private	void TestSessionsStart(Database db, TelegramBot bot, Update upd) throws SQLException
+	private	void TestSessionsStart(Database db, TelegramBot bot, Update upd) throws Exception
 	{	
         Player asW = new Player();
         asW = db.getUserTgID(upd.message().from().id());
@@ -377,7 +433,7 @@ public class BotCommandHendler
 			db.AddUserdb(upd.message().from().id(), upd.message().from().firstName().toString());
     }
     
-    private void Create (Database db, TelegramBot bot, Update upd) throws SQLException 
+    private void Create (Database db, TelegramBot bot, Update upd) throws Exception 
     {
 		Player plr = new Player();
 		plr = db.getUserTgID(upd.message().from().id());
@@ -410,7 +466,7 @@ public class BotCommandHendler
 				+ "Индификатор: `" + lobbyCode + "`").parseMode(ParseMode.Markdown));
     }
     
-    private void join (Database db, TelegramBot bot, Update upd) throws SQLException 
+    private void join (Database db, TelegramBot bot, Update upd) throws Exception 
     {
 		long chatId = upd.message().chat().id();
 		String[] lobbyCode = upd.message().text().split(" ");	
@@ -623,7 +679,8 @@ public class BotCommandHendler
 
 	private void Kill (Database db, TelegramBot bot, Update upd) 
 	{
-		bot.execute(new SendMessage(upd.message().from().id(), "kill !"));
+		String str = "----------------------------------------------\n@ - Вы\n0 - Выход на этажи\n\n                         \n                         \n                         \n                         \n                         \n                         \n                         \n                         \n                         \n                         \n          ##  #          \n          ###@##         \n           #0###         \n              ##         \n               #         \n               #         \n               #         \n                         \n                         \n                         \n                         \n                         \n                         \n                         \n                         \n";		
+		bot.execute(new SendMessage(upd.message().from().id(), str).parseMode(ParseMode.Markdown));
 	}
 	
 	private void Cure (Database db, TelegramBot bot, Update upd) 
