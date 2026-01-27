@@ -16,7 +16,8 @@ public class Session
 	
 	// State
 	private GameState currentState;
-	//private GameStep currentStep;
+	private GameStep currentStep;
+	private int dayCount;
 	//private int currentDay;
 	
 	// players
@@ -54,10 +55,15 @@ public class Session
 			}
 			
 			this.currentState = GameState.NIGHT;
+			dayCount = 1;
+			this.currentStep = GameStep.MAFIA_ACTION;
 		}
 		else
 		{
 			assignRandomRoles();
+			this.currentState = GameState.NIGHT;
+			dayCount = 1;
+			this.currentStep = GameStep.MAFIA_ACTION;
 		}
 		
 	//	System.out.println(players.size());
@@ -107,7 +113,8 @@ public class Session
 		
 	}
 	 */
-	public void assignRandomRoles() 
+	
+	public void assignRandomRolesf() 
 	{
 		int P = players.size();
 		if (P < 0)
@@ -140,6 +147,69 @@ public class Session
 	    for (Player p : players.values()) 
 	    {
 	        p.setRole(roles.get(idx++));
+	    }
+	    
+	    logRoleDistribution();
+	}
+	
+	public void assignRandomRoles() 
+	{
+		Map<Long, Player> plrRaND = new HashMap<>();
+		
+	    for (Player player : players.values()) 
+	    {
+	    	if (player.getRole() == PlayerRole.DEFAULT)
+	    	{
+	    		plrRaND.put(player.getPublicID(), player);
+	    	}
+	    }
+		
+	    if (plrRaND.isEmpty())
+	    	System.out.println("plrRaND пустой !\n");
+	    
+		int P = plrRaND.size();
+		if (P < 0)
+		{
+			System.out.println("Игроков не найдено !\n");
+			return;
+		}
+		
+		// Хз как я это сделал, но оно работает блин
+	    int M = P <= 6 ? 1 : P <= 12 ? 2 : P <= 17 ? 3 : 4;
+	    int D = P < 5 ? 0 : P < 15 ? 1 : 2;
+	    int S = P < 6 ? 0 : P < 15 ? 1 : 2;
+	    
+	    List<PlayerRole> roles = new ArrayList<>();
+	    for (int i = 0; i < M; i++) 
+	    	roles.add(PlayerRole.MAFIA);
+	    
+	    for (int i = 0; i < D; i++) 
+	    	roles.add(PlayerRole.DOCTOR);
+	    
+	    for (int i = 0; i < S; i++) 
+	    	roles.add(PlayerRole.SHERIFF);
+	    
+	    for (int i = 0; i < (P - M - D - S); i++) 
+	    	roles.add(PlayerRole.NEUTRAL);
+	    
+	    Collections.shuffle(roles);
+	    
+	    int idx = 0;
+	    for (Player p : plrRaND.values()) 
+	    {
+	        p.setRole(roles.get(idx++));
+	    }
+	    
+	    for (Entry<Long, Player> plrs : plrRaND.entrySet()) 
+	    {
+	        if (players.containsKey(plrs.getKey())) 
+	        {
+	            players.get(plrs.getKey()).setRole(plrs.getValue().getRole());
+	        } 
+	        else 
+	        {
+	            players.put(plrs.getKey(), plrs.getValue());
+	        }
 	    }
 	    
 	    logRoleDistribution();
@@ -205,6 +275,16 @@ public class Session
 		return this.players;
 	}
 	
+	public void setDayCount(int dayCount)
+	{
+		this.dayCount = dayCount;
+	}
+	
+	public int getDayCount()
+	{
+		return this.dayCount;
+	}
+	
 	public void setLeaderGame(Player leader)
 	{
 		this.leader = leader;
@@ -227,6 +307,27 @@ public class Session
 		players.remove(public_id);
 		
 		return true;
+	}
+	
+	public GameStep getGameStep()
+	{
+		return this.currentStep;
+	}
+	
+	public void setGameStep(GameStep currentState)
+	{
+		this.currentStep = currentState;
+	}
+	
+	
+	public GameState getGameState()
+	{
+		return this.currentState;
+	}
+	
+	public void setGameState(GameState currentState)
+	{
+		this.currentState = currentState;
 	}
 	
 	public int getPlayerCount()

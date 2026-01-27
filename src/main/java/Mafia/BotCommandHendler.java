@@ -49,6 +49,7 @@ public class BotCommandHendler
 		CommandRegister("/lobby", this::ShowLobbyInfo);
 		CommandRegister("/setrole", this::SetRole);
 		CommandRegister("/setrandomrole", this::SetRandomRole);
+		CommandRegister("/setrandomrolef", this::SetRandomRolef);
 	}
 
 	private void CommandRegister (String name, CommandInterface command)
@@ -92,6 +93,59 @@ public class BotCommandHendler
             	bot.execute(new SendMessage(plrs.getValue().getUserID(), "Сессия `" + lobbyid + "` удалена !").parseMode(ParseMode.Markdown));            	
             }
         }
+	}
+	
+	private	void SetRandomRolef(Database db, TelegramBot bot, Update upd) throws SQLException
+	{
+		if (!existPlayerSession(upd.message().from().id()))
+		{
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+			return;
+		}  
+	
+		Player plr = db.getUserTgID(upd.message().from().id());
+		String lobbyid = getActiveSessionID(plr.getPublicID());
+
+		if(lobbyid == null)
+		{
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+			return;
+		}
+		
+		if (upd.message().from().id() != activeSessions.get(lobbyid).getLeaderGame().getUserID())
+		{
+			bot.execute(new SendMessage(upd.message().from().id(), "Вы не ведущий !").parseMode(ParseMode.Markdown));
+			return;
+		}
+		
+		activeSessions.get(lobbyid).assignRandomRolesf();
+		
+        for (Entry<Long, Player> plrs : activeSessions.get(lobbyid).getPlayer().entrySet())
+        {
+        	switch(plrs.getValue().getRole())
+        	{
+        	case MAFIA:
+        		bot.execute(new SendMessage(plrs.getValue().getUserID(), "Ведущий назначил вас на роль мафии !").parseMode(ParseMode.Markdown));
+        	break;
+        	case DOCTOR:
+        		bot.execute(new SendMessage(plrs.getValue().getUserID(), "Ведущий назначил вас на роль доктора !").parseMode(ParseMode.Markdown));
+        	break;
+        	case SHERIFF:
+        		bot.execute(new SendMessage(plrs.getValue().getUserID(), "Ведущий назначил вас на роль шерифа !").parseMode(ParseMode.Markdown));
+        	break;
+        	case NEUTRAL:
+        		bot.execute(new SendMessage(plrs.getValue().getUserID(), "Ведущий назначил вас на роль мирного жителя !").parseMode(ParseMode.Markdown));
+        	break;
+			default:
+				bot.execute(new SendMessage(upd.message().from().id(), "Игрок: `" + plrs.getValue().getGameUserNick() + "` `" + plrs.getValue().getPublicID() + "` без роли !").parseMode(ParseMode.Markdown));
+				break;
+        	}
+        }
+		
+        if (!activeSessions.get(lobbyid).getLeaderChoosesRoles())
+        	activeSessions.get(lobbyid).setLeaderChoosesRoles(true);
+        
+		bot.execute(new SendMessage(upd.message().from().id(), "Рандомные роли рассчитаны !").parseMode(ParseMode.Markdown));
 	}
 	
 	private	void SetRandomRole(Database db, TelegramBot bot, Update upd) throws SQLException
@@ -142,7 +196,7 @@ public class BotCommandHendler
         }
 		
         if (!activeSessions.get(lobbyid).getLeaderChoosesRoles())
-        	activeSessions.get(lobbyid).setLeaderChoosesRoles(true);
+        	activeSessions.get(lobbyid).setLeaderChoosesRoles(false);
         
 		bot.execute(new SendMessage(upd.message().from().id(), "Рандомные роли рассчитаны !").parseMode(ParseMode.Markdown));
 	}
@@ -827,7 +881,36 @@ public class BotCommandHendler
 		
 		try 
 		{
-			activeSessions.get(lobbyid).StartGame();		
+			activeSessions.get(lobbyid).StartGame();	
+			
+			if (activeSessions.get(lobbyid).getGameState() == GameState.NIGHT)
+			{		
+				if (activeSessions.get(lobbyid).getGameStep() == GameStep.MAFIA_ACTION)
+				{
+					for (Entry<Long, Player> plrs : activeSessions.get(lobbyid).getPlayer().entrySet())
+		            {
+						switch (plrs.getValue().getRole())
+						{
+						case MAFIA:
+							String str = "";
+							str += "Мафия ваш ход !\n Выберите кого хотите убить этой ночью !\n"
+								+ "/kill <id> - чтобы убить\n"
+								+ "*Список игроков: *\n";
+							
+							for (Entry<Long, Player> plq : activeSessions.get(lobbyid).getPlayer().entrySet())
+				            {
+	                    		str += "\t\t\tНик: `" + plq.getValue().getGameUserNick() + "`\n"
+		                    			 + "\t\t\tИндификатор: `" + plq.getValue().getPublicID() + "`\n";
+				            }
+							bot.execute(new SendMessage(plrs.getValue().getUserID(), str).parseMode(ParseMode.Markdown));
+						break;
+						default:
+							bot.execute(new SendMessage(plrs.getValue().getUserID(), "Мафия просыпается !").parseMode(ParseMode.Markdown));
+						break;
+						}
+		            }
+				}
+			}
 		}
 		catch (Exception e)
 		{
