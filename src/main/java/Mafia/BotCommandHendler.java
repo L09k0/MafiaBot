@@ -81,10 +81,16 @@ public class BotCommandHendler
 
         if (activeSessions.get(lobbyid) != null) 
         {
+        	Map<Long, Player> playersToNotify = new HashMap<>(activeSessions.get(lobbyid).getPlayer());
+        	
         	activeSessions.get(lobbyid).closeSession(); 
             activeSessions.remove(lobbyid); 
             System.out.println("Сессия " + lobbyid + " удалена из активных");
-            bot.execute(new SendMessage(upd.message().from().id(), "Сессия " + lobbyid + " удалена !").parseMode(ParseMode.Markdown));
+            
+            for (Entry<Long, Player> plrs : playersToNotify.entrySet())
+            {
+            	bot.execute(new SendMessage(plrs.getValue().getUserID(), "Сессия `" + lobbyid + "` удалена !").parseMode(ParseMode.Markdown));            	
+            }
         }
 	}
 	
