@@ -148,23 +148,50 @@ public class BotCommandHendler
 			}
 			
 			String[] agrc = upd.message().text().split(" ");
+			
 			if (agrc.length > 1)
 			{
+				long plrID = Long.valueOf(agrc[2]);
+				
 				if (agrc.length > 2)
 				{
 					switch (agrc[1]) 
 					{
 					case "mafia":
-						activeSessions.get(lobbyid).setRole(Long.valueOf(agrc[2]), PlayerRole.MAFIA);
+						activeSessions.get(lobbyid).setRole(plrID, PlayerRole.MAFIA);
+						
+			            for (Entry<Long, Player> plrs : activeSessions.get(lobbyid).getPlayer().entrySet())
+			            {
+			            	if (plrs.getValue().getPublicID() == plrID)
+			            		bot.execute(new SendMessage(plrs.getValue().getUserID(), "Ведущий назначил вас на роль мафии !").parseMode(ParseMode.Markdown));            	
+			            }
 					break;
 					case "doctor":
-						activeSessions.get(lobbyid).setRole(Long.valueOf(agrc[2]), PlayerRole.DOCTOR);
+						activeSessions.get(lobbyid).setRole(plrID, PlayerRole.DOCTOR);
+			           
+						for (Entry<Long, Player> plrs : activeSessions.get(lobbyid).getPlayer().entrySet())
+			            {
+			            	if (plrs.getValue().getPublicID() == plrID)
+			            		bot.execute(new SendMessage(plrs.getValue().getUserID(), "Ведущий назначил вас на роль доктора !").parseMode(ParseMode.Markdown));            	
+			            }
 					break;
 					case "sheriff":
-						activeSessions.get(lobbyid).setRole(Long.valueOf(agrc[2]), PlayerRole.SHERIFF);	
+						activeSessions.get(lobbyid).setRole(plrID, PlayerRole.SHERIFF);	
+						
+			            for (Entry<Long, Player> plrs : activeSessions.get(lobbyid).getPlayer().entrySet())
+			            {
+			            	if (plrs.getValue().getPublicID() == plrID)
+			            		bot.execute(new SendMessage(plrs.getValue().getUserID(), "Ведущий назначил вас на роль шерифа !").parseMode(ParseMode.Markdown));            	
+			            }
 					break;
 					case "neutral":
-						activeSessions.get(lobbyid).setRole(Long.valueOf(agrc[2]), PlayerRole.NEUTRAL);	
+						activeSessions.get(lobbyid).setRole(plrID, PlayerRole.NEUTRAL);	
+						
+			            for (Entry<Long, Player> plrs : activeSessions.get(lobbyid).getPlayer().entrySet())
+			            {
+			            	if (plrs.getValue().getPublicID() == plrID)
+			            		bot.execute(new SendMessage(plrs.getValue().getUserID(), "Ведущий назначил вас на роль мирного жителя !").parseMode(ParseMode.Markdown));            	
+			            }
 					break;
 					default:
 						bot.execute(new SendMessage(upd.message().from().id(), "Нет такой роли !").parseMode(ParseMode.Markdown));
