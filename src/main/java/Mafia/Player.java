@@ -7,6 +7,7 @@ public class Player
 	private long tg_id;
 	private long public_id;
 	private PlayerRole rp;
+	private boolean live;
 	
 	public Player() 
 	{
@@ -58,6 +59,17 @@ public class Player
 		return this.tg_name;	
 	}
 	
+	public boolean getLiveStatus()
+	{
+		return this.live;	
+	}
+	
+	public void setLiveStatus(boolean live)
+	{
+		this.live = live;	
+	}
+	
+	
 	public Player NULL()
 	{
 		this.tg_id = 0;
@@ -65,6 +77,7 @@ public class Player
 		this.tg_name = null;
 		this.nickname = null;
 		this.rp = PlayerRole.DEFAULT;
+		this.live = true;
 		
 		return this;
 	}	

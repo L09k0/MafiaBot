@@ -795,10 +795,58 @@ public class BotCommandHendler
     	bot.execute(new SendMessage(upd.message().from().id(), "Vote !"));
     }
 
-	private void Kill (Database db, TelegramBot bot, Update upd) 
+	private void Kill (Database db, TelegramBot bot, Update upd) throws SQLException 
 	{
-		String str = "----------------------------------------------\n@ - Вы\n0 - Выход на этажи\n\n                         \n                         \n                         \n                         \n                         \n                         \n                         \n                         \n                         \n                         \n          ##  #          \n          ###@##         \n           #0###         \n              ##         \n               #         \n               #         \n               #         \n                         \n                         \n                         \n                         \n                         \n                         \n                         \n                         \n";		
-		bot.execute(new SendMessage(upd.message().from().id(), str).parseMode(ParseMode.Markdown));
+		if (!existPlayerSession(upd.message().from().id()))
+		{
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+			return;
+		}  
+			
+		Player curreplr = new Player();
+		curreplr = db.getUserTgID(upd.message().from().id());
+		String lobbyid = getActiveSessionID(curreplr.getPublicID());
+		
+		if(lobbyid == null)
+		{
+			bot.execute(new SendMessage(upd.message().from().id(), "Вас нету в игре !").parseMode(ParseMode.Markdown));
+			return;
+		}
+		
+		for (Entry<Long, Player> plrs : activeSessions.get(lobbyid).getPlayer().entrySet())
+		{
+			if (plrs.getValue().getRole() == PlayerRole.MAFIA)
+			{
+				String[] agrc = upd.message().text().split(" ");
+				
+				if (agrc.length < 1)
+				{
+					bot.execute(new SendMessage(upd.message().from().id(), "Укажите id игрока !").parseMode(ParseMode.Markdown));					
+				}
+				else
+				{
+					for (Entry<Long, Player> plrkill : activeSessions.get(lobbyid).getPlayer().entrySet())
+					{
+						if (plrkill.getKey() == Long.valueOf(agrc[1]));
+						{
+							if (plrkill.getValue().getLiveStatus() == true)
+								plrkill.getValue().setLiveStatus(false);
+							
+							if (plrkill.getValue().getLiveStatus() == true)
+							{
+								bot.execute(new SendMessage(upd.message().from().id(), "Почему то не удалось убить игрока, может в другой раз все получится :<").parseMode(ParseMode.Markdown));															
+							}
+							else
+							{
+								bot.execute(new SendMessage(upd.message().from().id(), "Вы убили `" + plrkill.getValue().getGameUserNick() + "` " + plrkill.getValue().getLiveStatus()).parseMode(ParseMode.Markdown));
+								break;
+							}
+						}
+					}
+					break;
+				}
+			}
+		}
 	}
 	
 	private void Cure (Database db, TelegramBot bot, Update upd) 
