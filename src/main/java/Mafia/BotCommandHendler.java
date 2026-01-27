@@ -119,6 +119,31 @@ public class BotCommandHendler
 		
 		activeSessions.get(lobbyid).assignRandomRoles();
 		
+        for (Entry<Long, Player> plrs : activeSessions.get(lobbyid).getPlayer().entrySet())
+        {
+        	switch(plrs.getValue().getRole())
+        	{
+        	case MAFIA:
+        		bot.execute(new SendMessage(plrs.getValue().getUserID(), "Ведущий назначил вас на роль мафии !").parseMode(ParseMode.Markdown));
+        	break;
+        	case DOCTOR:
+        		bot.execute(new SendMessage(plrs.getValue().getUserID(), "Ведущий назначил вас на роль доктора !").parseMode(ParseMode.Markdown));
+        	break;
+        	case SHERIFF:
+        		bot.execute(new SendMessage(plrs.getValue().getUserID(), "Ведущий назначил вас на роль шерифа !").parseMode(ParseMode.Markdown));
+        	break;
+        	case NEUTRAL:
+        		bot.execute(new SendMessage(plrs.getValue().getUserID(), "Ведущий назначил вас на роль мирного жителя !").parseMode(ParseMode.Markdown));
+        	break;
+			default:
+				bot.execute(new SendMessage(upd.message().from().id(), "Игрок: `" + plrs.getValue().getGameUserNick() + "` `" + plrs.getValue().getPublicID() + "` без роли !").parseMode(ParseMode.Markdown));
+				break;
+        	}
+        }
+		
+        if (!activeSessions.get(lobbyid).getLeaderChoosesRoles())
+        	activeSessions.get(lobbyid).setLeaderChoosesRoles(true);
+        
 		bot.execute(new SendMessage(upd.message().from().id(), "Рандомные роли рассчитаны !").parseMode(ParseMode.Markdown));
 	}
 	
