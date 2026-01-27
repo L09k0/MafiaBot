@@ -62,6 +62,14 @@ public class Session
 		
 	//	System.out.println(players.size());
 	}
+	
+	public void closeSession()
+	{
+		this.players.clear();
+		this.leader = null;
+		System.out.println("Сессия " + sessionID + " закрыта !");
+	}
+	
 /*	для теста
 	public void setFindСoefficient() throws Exception
 	{
@@ -108,6 +116,7 @@ public class Session
 			return;
 		}
 		
+		// Хз как я это сделал, но оно работает блин
 	    int M = P <= 6 ? 1 : P <= 12 ? 2 : P <= 17 ? 3 : 4;
 	    int D = P < 5 ? 0 : P < 15 ? 1 : 2;
 	    int S = P < 6 ? 0 : P < 15 ? 1 : 2;

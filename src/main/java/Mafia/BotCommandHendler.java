@@ -78,8 +78,14 @@ public class BotCommandHendler
 			bot.execute(new SendMessage(upd.message().from().id(), "Вы не ведущий !").parseMode(ParseMode.Markdown));
 			return;
 		}
-		
-		bot.execute(new SendMessage(upd.message().from().id(), "Лобби закрыто тест !").parseMode(ParseMode.Markdown));
+
+        if (activeSessions.get(lobbyid) != null) 
+        {
+        	activeSessions.get(lobbyid).closeSession(); 
+            activeSessions.remove(lobbyid); 
+            System.out.println("Сессия " + lobbyid + " удалена из активных");
+            bot.execute(new SendMessage(upd.message().from().id(), "Сессия " + lobbyid + " удалена !").parseMode(ParseMode.Markdown));
+        }
 	}
 	
 	private	void SetRandomRole(Database db, TelegramBot bot, Update upd) throws SQLException
