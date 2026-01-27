@@ -206,10 +206,6 @@ public class Session
 	        {
 	            players.get(plrs.getKey()).setRole(plrs.getValue().getRole());
 	        } 
-	        else 
-	        {
-	            players.put(plrs.getKey(), plrs.getValue());
-	        }
 	    }
 	    
 	    logRoleDistribution();
