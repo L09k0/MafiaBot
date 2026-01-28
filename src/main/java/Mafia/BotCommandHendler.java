@@ -813,42 +813,66 @@ public class BotCommandHendler
 			return;
 		}
 		
-		for (Entry<Long, Player> plrs : activeSessions.get(lobbyid).getPlayer().entrySet())
-		{
-			if (plrs.getValue().getRole() == PlayerRole.MAFIA)
+		if (activeSessions.get(lobbyid).getGameState() == GameState.NIGHT)
+		{	
+			if (activeSessions.get(lobbyid).getGameStep() == GameStep.MAFIA_ACTION)
 			{
-				String[] agrc = upd.message().text().split(" ");
-				
-				if (agrc.length < 1)
+				if (activeSessions.get(lobbyid).getPlayer().get(curreplr.getPublicID()).getRole() == PlayerRole.MAFIA)
 				{
-					bot.execute(new SendMessage(upd.message().from().id(), "Укажите id игрока !").parseMode(ParseMode.Markdown));					
-				}
-				else
-				{
-					for (Entry<Long, Player> plrkill : activeSessions.get(lobbyid).getPlayer().entrySet())
+					String[] agrc = upd.message().text().split(" ");
+					if (agrc.length >= 2)
 					{
-						if (plrkill.getKey() == Long.valueOf(agrc[1]));
+						long idplrKilled = Long.valueOf(agrc[1]);
+						
+						if (activeSessions.get(lobbyid).getPlayer().get(idplrKilled) != null)
 						{
-							if (plrkill.getValue().getLiveStatus() == true)
-								plrkill.getValue().setLiveStatus(false);
+							Player target = activeSessions.get(lobbyid).getPlayer().get(idplrKilled);
+							target.setLiveStatus(false);
 							
-							if (plrkill.getValue().getLiveStatus() == true)
+							if (target.getLiveStatus())
 							{
 								bot.execute(new SendMessage(upd.message().from().id(), "Почему то не удалось убить игрока, может в другой раз все получится :<").parseMode(ParseMode.Markdown));															
+								return;
 							}
 							else
 							{
-								bot.execute(new SendMessage(upd.message().from().id(), "Вы убили `" + plrkill.getValue().getGameUserNick() + "` " + plrkill.getValue().getLiveStatus()).parseMode(ParseMode.Markdown));
-								break;
+								bot.execute(new SendMessage(upd.message().from().id(), "Вы убили `" + target.getGameUserNick() + "`").parseMode(ParseMode.Markdown));
+								return;
 							}
+								
 						}
+						else
+						{
+							bot.execute(new SendMessage(upd.message().from().id(), "Игрока с таким id не найдено !").parseMode(ParseMode.Markdown));
+							return;
+						}
+						
 					}
-					break;
+					else
+					{
+						bot.execute(new SendMessage(upd.message().from().id(), "Введи id игрока которого хочешь убить !\n/kill <id>").parseMode(ParseMode.Markdown));
+						return;
+					}
+				}
+				else
+				{
+					bot.execute(new SendMessage(upd.message().from().id(), "Убивать может только мафия !").parseMode(ParseMode.Markdown));
+					return;
 				}
 			}
+			else
+			{
+				bot.execute(new SendMessage(upd.message().from().id(), "Убивать можно только в ход мафии !").parseMode(ParseMode.Markdown));
+				return;
+			}
+		}
+		else
+		{
+			bot.execute(new SendMessage(upd.message().from().id(), "Убивать можно только ночью !").parseMode(ParseMode.Markdown));
+			return;
 		}
 	}
-	
+
 	private void Cure (Database db, TelegramBot bot, Update upd) 
 	{
 		bot.execute(new SendMessage(upd.message().from().id(), "Cure !"));
@@ -901,7 +925,47 @@ public class BotCommandHendler
 			return;
 		}
 		
-		activeSessions.get(lobbyid).Step();
+		//activeSessions.get(lobbyid).Step();
+		
+		switch (activeSessions.get(lobbyid).getGameStep())
+		{
+		case MAFIA_ACTION:
+			if (activeSessions.get(lobbyid).getGameState() == GameState.NIGHT)
+			{		
+				if (activeSessions.get(lobbyid).getGameStep() == GameStep.MAFIA_ACTION)
+				{
+					for (Entry<Long, Player> plrs : activeSessions.get(lobbyid).getPlayer().entrySet())
+		            {
+						System.out.println(plrs.getValue().getPublicID() + " " + plrs.getValue().getLiveStatus());
+						switch (plrs.getValue().getRole())
+						{
+						case MAFIA:
+							String str = "";
+							str += "Мафия ваш ход !\n Выберите кого хотите убить этой ночью !\n"
+								+ "/kill <id> - чтобы убить\n"
+								+ "*Список игроков: *\n";
+							
+							for (Entry<Long, Player> plq : activeSessions.get(lobbyid).getPlayer().entrySet())
+							{
+							    if(plq.getValue().getLiveStatus())
+							    {
+							        str += "\t\t\t`" + plq.getValue().getGameUserNick() + "` "
+							            + "`" + plq.getValue().getPublicID() + "` " + plq.getValue().getLiveStatus() + "\n";
+							    }
+							}
+							bot.execute(new SendMessage(plrs.getValue().getUserID(), str).parseMode(ParseMode.Markdown));
+						break;
+						default:
+							bot.execute(new SendMessage(plrs.getValue().getUserID(), "Мафия просыпается !").parseMode(ParseMode.Markdown));
+						break;
+						}
+		            }
+				}
+			}
+		break;
+		default:
+			break;
+		}
 	}
 	
 	private void StartGame (Database db, TelegramBot bot, Update upd) throws SQLException 
@@ -946,11 +1010,15 @@ public class BotCommandHendler
 								+ "*Список игроков: *\n";
 							
 							for (Entry<Long, Player> plq : activeSessions.get(lobbyid).getPlayer().entrySet())
-				            {
-	                    		str += "\t\t\tНик: `" + plq.getValue().getGameUserNick() + "`\n"
-		                    			 + "\t\t\tИндификатор: `" + plq.getValue().getPublicID() + "`\n";
-				            }
+							{
+							    if(plq.getValue().getLiveStatus())
+							    {
+							        str += "\t\t\t`" + plq.getValue().getGameUserNick() + "` "
+							            + "`" + plq.getValue().getPublicID() + "` " + plq.getValue().getLiveStatus() + "\n";
+							    }
+							}
 							bot.execute(new SendMessage(plrs.getValue().getUserID(), str).parseMode(ParseMode.Markdown));
+							
 						break;
 						default:
 							bot.execute(new SendMessage(plrs.getValue().getUserID(), "Мафия просыпается !").parseMode(ParseMode.Markdown));

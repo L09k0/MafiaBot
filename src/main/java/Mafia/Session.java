@@ -234,8 +234,8 @@ public class Session
 	
 	public void Step()
 	{
-		currentState = currentState.next();
-		System.out.println(currentState);
+		currentStep = currentStep.next();
+		System.out.println(currentStep);
 	}
 	
 	public void EndGame()
@@ -266,6 +266,7 @@ public class Session
 		return this.sessionID;
 	}
 	
+	// publicid
 	public Map<Long, Player> getPlayer()
 	{
 		return this.players;
